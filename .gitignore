@@ -1,2 +1,10 @@
 build/
 release/
+
+#vscode
+.vscode/
+
+#mac
+.DS_Store
+
+*.tar.gz

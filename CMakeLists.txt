@@ -143,7 +143,7 @@ else()
     CMAKE_GENERATOR ${CMAKE_GENERATOR}
     INSTALL_COMMAND
     ${CMAKE_COMMAND} --install <BINARY_DIR> --config ${Whispercpp_BUILD_TYPE}
-    && ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/ggml/include/ggml.h
+    && ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/ggml/include/*
     <INSTALL_DIR>/include
     CONFIGURE_COMMAND
     ${CMAKE_COMMAND} -E env ${WHISPER_ADDITIONAL_ENV} ${CMAKE_COMMAND}
@@ -236,7 +236,7 @@ else()
 
   if(APPLE)
     # copy the Metal shader library to the release directory
-    install(DIRECTORY ${INSTALL_DIR}/bin
+    install(DIRECTORY ${BINARY_DIR}/bin
       DESTINATION ${CMAKE_SOURCE_DIR}/release)
     install(
       FILES

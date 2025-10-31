@@ -228,7 +228,11 @@ jobs:
       - name: Generate Checksums
         run: |
           : Generate Checksums
-          "./Generate-Checksums.ps1 -Path ${{ github.workspace }}"
+          Get-ChildItem -Path "${{ github.workspace }}" -Recurse -Include *.tar.gz,*.zip | Foreach-Object {
+            $name = $_.Name
+            $hash = (Get-FileHash $name).Hash.ToLower()
+            "    ${name}: ${hash}" >> "$Path\CHECKSUMS.txt"
+          }
 
       - name: "Create Release"
         uses: "softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5"

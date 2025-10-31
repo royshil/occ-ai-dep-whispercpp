@@ -11,7 +11,7 @@ option(WHISPERCPP_WITH_VULKAN "Build Whisper with Vulkan support" OFF)
 
 set(CMAKE_OSX_ARCHITECTURES_ "$ENV{MACOS_ARCH}")
 
-set(Whispercpp_Build_GIT_TAG "8a9ad7844d6e2a10cddf4b92de4089d7ac2b14a9")
+set(Whispercpp_Build_GIT_TAG "v1.8.2")
 
 if(${CMAKE_BUILD_TYPE} STREQUAL Release OR ${CMAKE_BUILD_TYPE} STREQUAL
                                            RelWithDebInfo)

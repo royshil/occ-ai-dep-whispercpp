@@ -21,7 +21,7 @@ The HIP installer can be downloaded from https://download.amd.com/developer/eula
 Run the build script:
 
 ```powershell
-> ./Build-Windows.ps1 -Version 0.0.6
+> ./Build-Windows.ps1 -Version 0.0.9
 ```
 
 ## Building on Mac OS
@@ -35,5 +35,5 @@ $ export MACOS_ARCH=x86_64
 Run the build script:
 
 ```bash
-$ ./build-macos.sh 0.0.6
+$ ./build-macos.sh 0.0.9
 ```

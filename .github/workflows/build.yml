@@ -232,11 +232,13 @@ jobs:
       - name: Generate Checksums
         run: |
           : Generate Checksums
-          Get-ChildItem -Path "${{ github.workspace }}" -Recurse -Include *.tar.gz,*.zip | Foreach-Object {
-            $name = $_.Name
-            $hash = (Get-FileHash $name).Hash.ToLower()
-            "    ${name}: ${hash}" >> "$Path\CHECKSUMS.txt"
-          }
+          if [[ "${RUNNER_DEBUG}" ]]; then set -x; fi
+          shopt -s extglob
+
+          echo "### Checksums" > ${{ github.workspace }}/CHECKSUMS.txt
+          for file in ${{ github.workspace }}/@(*.tar.gz|*.zip); do
+            echo "    ${file##*/}: $(sha256sum "${file}" | cut -d " " -f 1)" >> ${{ github.workspace }}/CHECKSUMS.txt
+          done
 
       - name: "Create Release"
         uses: "softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5"

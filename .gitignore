@@ -4,7 +4,15 @@ release/
 #vscode
 .vscode/
 
+#vs
+.vs/
+
 #mac
 .DS_Store
 
 *.tar.gz
+
+#built archives
+*.zip
+*.tgz
+*.xz

@@ -41,13 +41,19 @@ if ($env:BUILD_WITH_ACCEL -eq "cpu") {
     $zipFileName = "whispercpp-windows-cuda-$Version.zip"
 }
 
-# configure
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release @cmakeArgs
+if ($env:RUNNER_TEMP) {
+  $build_dir = "$env:RUNNER_TMP\build"
+} else {
+  $build_dir = "build"
+}
 
-cmake --build build --config Release
+# configure
+cmake -S . -B $build_dir -DCMAKE_BUILD_TYPE=Release @cmakeArgs
+
+cmake --build $build_dir --config Release
 
 # install
-cmake --install build
+cmake --install $build_dir
 
 # compress the release folder
 Compress-Archive -Force -Path release -DestinationPath $zipFileName

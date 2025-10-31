@@ -42,7 +42,7 @@ if ($env:BUILD_WITH_ACCEL -eq "cpu") {
 }
 
 if ($env:RUNNER_TEMP) {
-  $build_dir = "$env:RUNNER_TMP\build"
+  $build_dir = "$env:RUNNER_TEMP\build"
 } else {
   $build_dir = "build"
 }

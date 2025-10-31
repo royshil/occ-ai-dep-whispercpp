@@ -225,12 +225,18 @@ jobs:
       - name: "Download build artifacts"
         uses: "actions/download-artifact@v4"
 
+      - name: Generate Checksums
+        run: |
+          : Generate Checksums
+          "./Generate-Checksums.ps1 -Path ${{ github.workspace }}"
+
       - name: "Create Release"
         uses: "softprops/action-gh-release@1e07f4398721186383de40550babbdf2b84acfc5"
         with:
           draft: true
           tag_name: "${{ steps.get-version.outputs.version }}"
           name: "${{ steps.get-version.outputs.version }}"
+          body_path: ${{ github.workspace }}/CHECKSUMS.txt
           files: |
             ${{ github.workspace }}/**/*.tar.gz
             ${{ github.workspace }}/**/*.zip

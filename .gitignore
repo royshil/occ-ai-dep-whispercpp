@@ -16,3 +16,5 @@ release/
 *.zip
 *.tgz
 *.xz
+
+CHECKSUMS.txt

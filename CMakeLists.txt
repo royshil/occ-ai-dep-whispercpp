@@ -24,7 +24,8 @@ if(UNIX AND NOT APPLE)
   # On linux add the `-fPIC` flag to the compiler
   set(WHISPER_EXTRA_CXX_FLAGS "-fPIC")
 
-  set(WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=OFF -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBlas
+  set(WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=OFF -DGGML_BLAS=ON
+                                    -DGGML_BLAS_VENDOR=OpenBlas)
   if(WHISPERCPP_WITH_VULKAN)
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_VULKAN=ON)
   endif()
@@ -73,7 +74,7 @@ if(WIN32)
     # Build with CUDA
     set(WHISPER_ADDITIONAL_ENV "")
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=ON
-                                              -DCMAKE_CUDA_ARCHITECTURES=all)
+         -DCMAKE_CUDA_ARCHITECTURES=all)
     set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
   elseif(WHISPERCPP_WITH_VULKAN)
     if(NOT DEFINED ENV{VULKAN_SDK_PATH})
@@ -98,10 +99,13 @@ if(WIN32)
 
     cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     set(WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS
-        -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-        -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DGGML_HIPBLAS=ON
-        -DGGML_CUDA=OFF)
+    list(
+      APPEND
+      WHISPER_ADDITIONAL_CMAKE_ARGS
+      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+      -DGGML_HIPBLAS=ON
+      -DGGML_CUDA=OFF)
     set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
   endif()
 
@@ -222,12 +226,10 @@ if(WIN32)
   message(STATUS "Install OpenBLAS DLLs")
 
   # add openblas to the link line
-  install(DIRECTORY ${OpenBLAS_DIR}/lib
-          DESTINATION ${CMAKE_SOURCE_DIR}/release)
+  install(DIRECTORY ${OpenBLAS_DIR}/lib DESTINATION ${CMAKE_SOURCE_DIR}/release)
   install(DIRECTORY ${OpenBLAS_DIR}/include
           DESTINATION ${CMAKE_SOURCE_DIR}/release)
-  install(DIRECTORY ${OpenBLAS_DIR}/bin
-          DESTINATION ${CMAKE_SOURCE_DIR}/release)
+  install(DIRECTORY ${OpenBLAS_DIR}/bin DESTINATION ${CMAKE_SOURCE_DIR}/release)
 else()
   # copy lib/ include/ and bin/ from ${INSTALL_DIR} to the release directory in
   # the root of the project

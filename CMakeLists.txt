@@ -24,10 +24,9 @@ if(UNIX AND NOT APPLE)
   # On linux add the `-fPIC` flag to the compiler
   set(WHISPER_EXTRA_CXX_FLAGS "-fPIC")
 
+  set(WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=OFF -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBlas
   if(WHISPERCPP_WITH_VULKAN)
-    set(WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=OFF -DGGML_VULKAN=ON)
-  else()
-    set(WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=OFF)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_VULKAN=ON)
   endif()
 endif()
 
@@ -49,11 +48,32 @@ if(APPLE)
 endif()
 
 if(WIN32)
+  # Build with OpenBLAS for all configurations
+  set(OpenBLAS_URL
+      "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.26/OpenBLAS-0.3.26-x64.zip"
+  )
+  set(OpenBLAS_SHA256
+      "859C510A962A30EF1B01AA93CDE26FDB5FB1050F94AD5AB2802EBA3731935E06")
+  FetchContent_Declare(
+    OpenBLAS
+    URL ${OpenBLAS_URL}
+    URL_HASH SHA256=${OpenBLAS_SHA256}
+    DOWNLOAD_EXTRACT_TIMESTAMP true)
+  FetchContent_MakeAvailable(OpenBLAS)
+  set(OpenBLAS_DIR ${openblas_SOURCE_DIR})
+  message(STATUS "OpenBLAS_DIR: ${OpenBLAS_DIR}")
+  set(WHISPER_ADDITIONAL_ENV "OPENBLAS_PATH=${openblas_SOURCE_DIR}")
+  set(WHISPER_ADDITIONAL_CMAKE_ARGS
+      -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS
+      -DBLAS_LIBRARIES=${OpenBLAS_DIR}/lib/libopenblas.lib
+      -DBLAS_INCLUDE_DIRS=${OpenBLAS_DIR}/include)
+  set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
+
   if(WHISPERCPP_WITH_CUDA)
     # Build with CUDA
     set(WHISPER_ADDITIONAL_ENV "")
-    set(WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=ON
-                                      -DCMAKE_CUDA_ARCHITECTURES=all)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=ON
+                                              -DCMAKE_CUDA_ARCHITECTURES=all)
     set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
   elseif(WHISPERCPP_WITH_VULKAN)
     if(NOT DEFINED ENV{VULKAN_SDK_PATH})
@@ -65,7 +85,7 @@ if(WIN32)
 
     # Build with VULKAN
     set(WHISPER_ADDITIONAL_ENV "VULKAN_SDK=$ENV{VULKAN_SDK_PATH}")
-    set(WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_VULKAN=ON)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_VULKAN=ON)
     set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
   elseif(WHISPERCPP_WITH_HIPBLAS)
     # Build with hipBLAS
@@ -78,31 +98,10 @@ if(WIN32)
 
     cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     set(WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
-    set(WHISPER_ADDITIONAL_CMAKE_ARGS
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS
         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DGGML_HIPBLAS=ON
         -DGGML_CUDA=OFF)
-    set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
-  else()
-    # Build with OpenBLAS
-    set(OpenBLAS_URL
-        "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.26/OpenBLAS-0.3.26-x64.zip"
-    )
-    set(OpenBLAS_SHA256
-        "859C510A962A30EF1B01AA93CDE26FDB5FB1050F94AD5AB2802EBA3731935E06")
-    FetchContent_Declare(
-      OpenBLAS
-      URL ${OpenBLAS_URL}
-      URL_HASH SHA256=${OpenBLAS_SHA256}
-      DOWNLOAD_EXTRACT_TIMESTAMP true)
-    FetchContent_MakeAvailable(OpenBLAS)
-    set(OpenBLAS_DIR ${openblas_SOURCE_DIR})
-    message(STATUS "OpenBLAS_DIR: ${OpenBLAS_DIR}")
-    set(WHISPER_ADDITIONAL_ENV "OPENBLAS_PATH=${openblas_SOURCE_DIR}")
-    set(WHISPER_ADDITIONAL_CMAKE_ARGS
-        -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS -DGGML_CUDA=OFF
-        -DBLAS_LIBRARIES=${OpenBLAS_DIR}/lib/libopenblas.lib
-        -DBLAS_INCLUDE_DIRS=${OpenBLAS_DIR}/include)
     set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
   endif()
 
@@ -218,17 +217,17 @@ if(WIN32)
     # copy the DLLs to the OBS plugin directory
     install(FILES ${CUBLAS_DLLS} ${CUBLASLT_DLLS} ${CUDART_DLLS}
             DESTINATION ${CMAKE_SOURCE_DIR}/release/bin)
-  else()
-    message(STATUS "Install OpenBLAS DLLs")
-
-    # add openblas to the link line
-    install(DIRECTORY ${OpenBLAS_DIR}/lib
-            DESTINATION ${CMAKE_SOURCE_DIR}/release)
-    install(DIRECTORY ${OpenBLAS_DIR}/include
-            DESTINATION ${CMAKE_SOURCE_DIR}/release)
-    install(DIRECTORY ${OpenBLAS_DIR}/bin
-            DESTINATION ${CMAKE_SOURCE_DIR}/release)
   endif()
+
+  message(STATUS "Install OpenBLAS DLLs")
+
+  # add openblas to the link line
+  install(DIRECTORY ${OpenBLAS_DIR}/lib
+          DESTINATION ${CMAKE_SOURCE_DIR}/release)
+  install(DIRECTORY ${OpenBLAS_DIR}/include
+          DESTINATION ${CMAKE_SOURCE_DIR}/release)
+  install(DIRECTORY ${OpenBLAS_DIR}/bin
+          DESTINATION ${CMAKE_SOURCE_DIR}/release)
 else()
   # copy lib/ include/ and bin/ from ${INSTALL_DIR} to the release directory in
   # the root of the project

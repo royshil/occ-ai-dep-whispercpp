@@ -48,10 +48,14 @@ if(APPLE)
 endif()
 
 if(WIN32)
-  add_compile_options("$<$<NOT:$<CONFIG:Debug>>:/Zi>")
-  add_link_options("$<$<NOT:$<CONFIG:Debug>>:/DEBUG>")
-  add_link_options("$<$<NOT:$<CONFIG:Debug>>:/OPT:REF>")
-  add_link_options("$<$<NOT:$<CONFIG:Debug>>:/OPT:ICF>")
+  if(NOT WHISPERCPP_WITH_HIPBLAS)
+    add_compile_options("$<$<NOT:$<CONFIG:Debug>>:/Zi>")
+    add_link_options("$<$<NOT:$<CONFIG:Debug>>:/DEBUG>")
+    add_link_options("$<$<NOT:$<CONFIG:Debug>>:/OPT:REF>")
+    add_link_options("$<$<NOT:$<CONFIG:Debug>>:/OPT:ICF>")
+  else()
+    add_compile_options("$<$<NOT:$<CONFIG:Debug>>:-g>")
+  endif()
 
   # Build with OpenBLAS for all configurations
   set(OpenBLAS_URL
@@ -108,7 +112,7 @@ if(WIN32)
       WHISPER_ADDITIONAL_CMAKE_ARGS
       -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-      -DGGML_HIPBLAS=ON)
+      -DGGML_HIP=ON -DGGML_HIP_ROCWMMA_FATTN=ON)
     set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
   endif()
 

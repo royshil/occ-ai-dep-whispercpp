@@ -50,11 +50,9 @@ endif()
 if(WIN32)
   if(NOT WHISPERCPP_WITH_HIPBLAS)
     add_compile_options("$<$<NOT:$<CONFIG:Debug>>:/Zi>")
-    add_link_options("$<$<NOT:$<CONFIG:Debug>>:/DEBUG>")
-    add_link_options("$<$<NOT:$<CONFIG:Debug>>:/OPT:REF>")
-    add_link_options("$<$<NOT:$<CONFIG:Debug>>:/OPT:ICF>")
-  else()
-    add_compile_options("$<$<NOT:$<CONFIG:Debug>>:-g>")
+    add_link_options("$<$<NOT:$<CONFIG:Debug>>/DEBUG">)
+    add_link_options("$<$<NOT:$<CONFIG:Debug>>/OPT:REF">)
+    add_link_options("$<$<NOT:$<CONFIG:Debug>>/OPT:ICF">)
   endif()
 
   # Build with OpenBLAS for all configurations
@@ -114,6 +112,9 @@ if(WIN32)
       -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
       -DGGML_HIP=ON)
     set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
+
+    list(APPEND WHISPER_EXTRA_CXX_FLAGS -g)
+    list(APPEND WHISPER_EXTRA_C_FLAGS -g)
   endif()
 
   if(WHISPER_DYNAMIC_BACKENDS)

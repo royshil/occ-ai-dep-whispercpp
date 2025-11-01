@@ -235,7 +235,6 @@ jobs:
           draft: true
           tag_name: "${{ steps.get-version.outputs.version }}"
           name: "${{ steps.get-version.outputs.version }}"
-          body_path: ${{ github.workspace }}/CHECKSUMS.txt
           files: |
             ${{ github.workspace }}/**/*.tar.gz
             ${{ github.workspace }}/**/*.zip

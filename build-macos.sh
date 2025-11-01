@@ -5,9 +5,9 @@
 version=$1
 
 # configure
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 
-cmake --build build --config Release
+cmake --build build --config RelWithDebInfo
 
 # install
 cmake --install build

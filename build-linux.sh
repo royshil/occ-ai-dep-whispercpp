@@ -13,9 +13,9 @@ else
 fi
 
 # configure
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release $CMAKE_ARGS
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo $CMAKE_ARGS
 
-cmake --build build --config Release
+cmake --build build --config RelWithDebInfo
 
 # install
 cmake --install build

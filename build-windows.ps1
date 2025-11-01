@@ -4,7 +4,7 @@ Param(
 
 # check env var BUILD_WITH_ACCEL
 if ($env:BUILD_WITH_ACCEL -eq $null) {
-    Write-Host "Please set env var BUILD_WITH_ACCEL to 'cpu', 'cuda', 'vulkan' or 'hipblas'."
+    Write-Host "Please set env var BUILD_WITH_ACCEL to 'cpu', 'dynamic-cpu', 'cuda', 'vulkan', or 'hipblas'."
     exit
 }
 
@@ -13,11 +13,13 @@ $env:VCPKG_ROOT=""
 
 $cmakeArgs = @()
 if ($env:BUILD_WITH_ACCEL -eq "cpu") {
-    $cmakeArgs += ("-DWHISPERCPP_WITH_CUDA=OFF")
+    $cmakeArgs += ("-DWHISPER_DYNAMIC_BACKENDS=OFF")
     $zipFileName = "whispercpp-windows-cpu-$Version.zip"
+} elseif ($env:BUILD_WITH_ACCEL -eq "dynamic-cpu") {
+    $cmakeArgs += ("-DWHISPER_DYNAMIC_BACKENDS=ON")
+    $zipFileName = "whispercpp-windows-cpu-dynamic-$Version.zip"
 } elseif ($env:BUILD_WITH_ACCEL -eq "hipblas") {
-    $cmakeArgs += ("-DWHISPERCPP_WITH_CUDA=OFF", 
-        "-DWHISPERCPP_WITH_HIPBLAS=ON", 
+    $cmakeArgs += ("-DWHISPERCPP_WITH_HIPBLAS=ON", 
         "-DCMAKE_GENERATOR=Unix Makefiles", 
         "-DCMAKE_C_COMPILER='$env:HIP_PATH\bin\clang.exe'",
         "-DCMAKE_CXX_COMPILER='$env:HIP_PATH\bin\clang++.exe'")
@@ -32,13 +34,16 @@ if ($env:BUILD_WITH_ACCEL -eq "cpu") {
     # find the Vulkan SDK version path in C:\VulkanSDK\
     $vulkanSdkPath = Get-ChildItem -Path "C:\VulkanSDK" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     $env:VULKAN_SDK_PATH="$vulkanSdkPath"
-} else {
+} elseif ($env:BUILD_WITH_ACCEL -eq "cuda") {
     $cmakeArgs += (
         "-DWHISPERCPP_WITH_CUDA=ON",
         "-DCMAKE_GENERATOR=Visual Studio 17 2022",
         "-DCUDA_TOOLKIT_ROOT_DIR=$env:CUDA_TOOLKIT_ROOT_DIR"
     )
     $zipFileName = "whispercpp-windows-cuda-$Version.zip"
+} else {
+    Write-Host "Unknown BUILD_WITH_ACCEL setting"
+    exit
 }
 
 if ($env:RUNNER_TEMP) {
@@ -48,9 +53,9 @@ if ($env:RUNNER_TEMP) {
 }
 
 # configure
-cmake -S . -B $build_dir -DCMAKE_BUILD_TYPE=Release @cmakeArgs
+cmake -S . -B $build_dir -DCMAKE_BUILD_TYPE=RelWithDebInfo @cmakeArgs
 
-cmake --build $build_dir --config Release
+cmake --build $build_dir --config RelWithDebInfo
 
 # install
 cmake --install $build_dir

@@ -74,7 +74,9 @@ if(APPLE)
     -DGGML_METAL_MACOSX_VERSION_MIN=12.0
     -DWHISPER_COREML=ON
     -DWHISPER_COREML_ALLOW_FALLBACK=ON
-    -DGGML_NATIVE=OFF)
+    -DGGML_NATIVE=OFF
+    -DGGML_BACKEND_DL=ON
+    -DGGML_CPU_ALL_VARIANTS=ON)
   set(WHISPER_EXTRA_CXX_FLAGS
       "-Wno-shorten-64-to-32 -Wno-unused-parameter -Wno-unused-function -Wno-unguarded-availability-new"
   )
@@ -189,7 +191,7 @@ if(WIN32)
       -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/cmake
       ${WHISPER_ADDITIONAL_CMAKE_ARGS})
 else()
-  # On Linux and MacOS build a static Whisper library
+  # On Linux and MacOS build a shared Whisper library
   ExternalProject_Add(
     Whispercpp_Build
     DOWNLOAD_EXTRACT_TIMESTAMP true

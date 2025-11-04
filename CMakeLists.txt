@@ -83,7 +83,7 @@ if(APPLE)
     # Whisper bug means that m4 variant won't build, so build for M1 (arm v8.2a
     # with dotprod)
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=OFF
-         -GGML_CPU_ARM_ARCH=armv8.2-a+dotprod)
+         -DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod)
   else()
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=ON)
   endif()

@@ -64,8 +64,7 @@ jobs:
       matrix:
         config:
           - "Release"
-        #accel: [generic, cuda, hipblas]
-        accel: [generic]
+        accel: [generic, nvidia, amd]
 
     defaults:
       run:
@@ -90,13 +89,44 @@ jobs:
           sudo apt install libopenblas-dev libopenblas-openmp-dev nvidia-opencl-dev ocl-icd-opencl-dev opencl-headers
 
       - name: "Install Vulkan SDK"
-        if: ${{ matrix.accel == 'vulkan' }}
         run: |
           sudo apt install -y wget
           wget -qO- https://packages.lunarg.com/lunarg-signing-key-pub.asc | sudo tee /etc/apt/trusted.gpg.d/lunarg.asc
           sudo wget -qO /etc/apt/sources.list.d/lunarg-vulkan-jammy.list http://packages.lunarg.com/vulkan/lunarg-vulkan-jammy.list
           sudo apt update
           sudo apt install vulkan-sdk
+
+      # - name: "Install oneAPI (SYCL) toolkit"
+      #   run: |
+      #     #  download the key to system keyring
+      #     wget -O- https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB \
+      #     | gpg --dearmor | sudo tee /usr/share/keyrings/oneapi-archive-keyring.gpg > /dev/null
+      #     # add signed entry to apt sources and configure the APT client to use Intel repository:
+      #     echo "deb [signed-by=/usr/share/keyrings/oneapi-archive-keyring.gpg] https://apt.repos.intel.com/
+      #     oneapi all main" | sudo tee /etc/apt/sources.list.d/oneAPI.list
+      #     sudo apt update
+      #     sudo apt install intel-basekit
+      #     # Probably don't need these
+      #     # sudo apt install intel-hpckit intel-renderkit
+
+      - name: "Install CUDA toolkit"
+        if: ${{ matrix.accel == 'nvidia' }}
+        uses: Jimver/cuda-toolkit@v0.2.29
+        id: cuda-toolkit
+        with:
+          cuda: '12.8.0'
+          linux-local-args: '["--toolkit", "--no-drm", "--no-opengl-libs", "--no-man-page"]'
+
+      - name: "Install AMD hip SDK v6.4.2"
+        if: ${{ matrix.accel == 'amd' }}
+        run: |
+          wget https://repo.radeon.com/amdgpu-install/6.4.2/ubuntu/jammy/amdgpu-install_6.4.60402-1_all.deb
+          sudo apt install ./amdgpu-install_6.4.60402-1_all.deb
+          sudo apt update
+          sudo apt install python3-setuptools python3-wheel
+          sudo usermod -a -G render,video $LOGNAME # Add the current user to the render and video groups
+          sudo apt install rocm
+          sudo apt update && sudo apt install hipblas
 
       - name: "Run build-linux.sh"
         run: "chmod +x build-linux.sh && ./build-linux.sh ${{ matrix.config }} ${{ steps.get-version.outputs.version }}"
@@ -158,13 +188,13 @@ jobs:
         run: |
           "CUDA_TOOLKIT_ROOT_DIR=$env:CUDA_PATH" >> $env:GITHUB_ENV
 
-      - name: Install hipBLAS
+      - name: Install AMD hip SDK v6.4.2
         id: depends-hipblas
         if: ${{ matrix.accel == 'hipblas' }}
         run: |
           $ErrorActionPreference = "Stop"
           write-host "Downloading AMD HIP SDK Installer"
-          Invoke-WebRequest -Uri "https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-24.Q3-Win10-Win11-For-HIP.exe" -OutFile "${env:RUNNER_TEMP}\rocm-install.exe"
+          Invoke-WebRequest -Uri "https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-25.Q3-Win10-Win11-For-HIP.exe" -OutFile "${env:RUNNER_TEMP}\rocm-install.exe"
           write-host "Installing AMD HIP SDK"
           Start-Process "${env:RUNNER_TEMP}\rocm-install.exe" -ArgumentList '-install' -NoNewWindow -Wait
           write-host "Completed AMD HIP SDK installation"

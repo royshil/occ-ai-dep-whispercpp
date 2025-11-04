@@ -5,14 +5,14 @@
 version=$1
 
 # check env var BUILD_WITH_ACCEL
-if [ "$BUILD_WITH_ACCEL" = "cuda" ]; then
-    echo "Building with CUDA acceleration"
-    export CMAKE_ARGS="$CMAKE_ARGS -DWHISPERCPP_WITH_CUDA=ON"
-elif [ "$BUILD_WITH_ACCEL" = "hipblas" ]; then
-    echo "Building with hipblas acceleration"
-    export CMAKE_ARGS="$CMAKE_ARGS -DWHISPERCPP_WITH_HIPBLAS=ON"
+if [ "$BUILD_WITH_ACCEL" = "nvidia" ]; then
+    echo "Building with NVidia specific acceleration options"
+    export CMAKE_ARGS="$CMAKE_ARGS -DWHISPERCPP_NVIDIA=ON"
+elif [ "$BUILD_WITH_ACCEL" = "amd" ]; then
+    echo "Building with AMD specific acceleration options"
+    export CMAKE_ARGS="$CMAKE_ARGS -DWHISPERCPP_AMD=ON"
 else
-    echo "Building with generic acceleration"
+    echo "Building with generic acceleration options"
 fi
 
 # configure

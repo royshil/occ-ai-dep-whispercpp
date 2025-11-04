@@ -13,7 +13,8 @@ set(CMAKE_OSX_ARCHITECTURES_ "$ENV{MACOS_ARCH}")
 
 set(Whispercpp_Build_GIT_TAG "v1.8.2")
 
-if(${CMAKE_BUILD_TYPE} STREQUAL Release OR ${CMAKE_BUILD_TYPE} STREQUAL RelWithDebInfo)
+if(${CMAKE_BUILD_TYPE} STREQUAL Release OR ${CMAKE_BUILD_TYPE} STREQUAL
+                                           RelWithDebInfo)
   set(Whispercpp_BUILD_TYPE RelWithDebInfo)
 else()
   set(Whispercpp_BUILD_TYPE Debug)
@@ -38,10 +39,14 @@ if(APPLE)
     )
   endif(NOT DEFINED ENV{MACOS_ARCH})
 
-  list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS
-      -DGGML_METAL=ON -DGGML_METAL_MACOSX_VERSION_MIN=12.0
-      -DWHISPER_COREML=ON -DWHISPER_COREML_ALLOW_FALLBACK=ON
-      -DGGML_NATIVE=OFF)
+  list(
+    APPEND
+    WHISPER_ADDITIONAL_CMAKE_ARGS
+    -DGGML_METAL=ON
+    -DGGML_METAL_MACOSX_VERSION_MIN=12.0
+    -DWHISPER_COREML=ON
+    -DWHISPER_COREML_ALLOW_FALLBACK=ON
+    -DGGML_NATIVE=OFF)
   set(WHISPER_EXTRA_CXX_FLAGS
       "-Wno-shorten-64-to-32 -Wno-unused-parameter -Wno-unused-function -Wno-unguarded-availability-new"
   )
@@ -105,20 +110,22 @@ if(WIN32)
 
     cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     set(WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
-    list(
-      APPEND
-      WHISPER_ADDITIONAL_CMAKE_ARGS
-      -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-      -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-      -DGGML_HIP=ON)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS
+         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DGGML_HIP=ON)
     set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
   endif()
 
   if(WHISPER_DYNAMIC_BACKENDS)
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_BACKEND_DL=ON -DGGML_CPU_ALL_VARIANTS=ON)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_BACKEND_DL=ON
+         -DGGML_CPU_ALL_VARIANTS=ON)
   else()
-    # Build for a skylake equivalent or newer CPU only - Assumes AVX2 support present
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_AVX=ON
+    # Build for a skylake equivalent or newer CPU only - Assumes AVX2 support
+    # present
+    list(
+      APPEND
+      WHISPER_ADDITIONAL_CMAKE_ARGS
+      -DGGML_AVX=ON
       -DGGML_AVX2=ON
       -DGGML_BMI2=ON
       -DGGML_F16C=ON
@@ -139,7 +146,8 @@ if(WIN32)
       <INSTALL_DIR>/bin/${CMAKE_SHARED_LIBRARY_PREFIX}whisper.pdb
       <INSTALL_DIR>/lib/${CMAKE_IMPORT_LIBRARY_PREFIX}whisper${CMAKE_IMPORT_LIBRARY_SUFFIX}
     CMAKE_GENERATOR ${CMAKE_GENERATOR}
-    INSTALL_COMMAND ${CMAKE_COMMAND} --install <BINARY_DIR> --config ${Whispercpp_BUILD_TYPE}
+    INSTALL_COMMAND ${CMAKE_COMMAND} --install <BINARY_DIR> --config
+                    ${Whispercpp_BUILD_TYPE}
     CONFIGURE_COMMAND
       ${CMAKE_COMMAND} -E env ${WHISPER_ADDITIONAL_ENV} ${CMAKE_COMMAND}
       <SOURCE_DIR> -B <BINARY_DIR> -G ${WHISPER_CMAKE_GENERATOR}
@@ -147,12 +155,9 @@ if(WIN32)
       -DCMAKE_BUILD_TYPE=${Whispercpp_BUILD_TYPE}
       -DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
       -DCMAKE_CXX_FLAGS=${WHISPER_EXTRA_CXX_FLAGS}
-      -DCMAKE_C_FLAGS=${WHISPER_EXTRA_CXX_FLAGS}
-      -DBUILD_SHARED_LIBS=ON
-      -DWHISPER_BUILD_TESTS=OFF
-      -DWHISPER_BUILD_EXAMPLES=OFF
-      -DWHISPER_BUILD_SERVER=OFF
-      -DGGML_NATIVE=OFF
+      -DCMAKE_C_FLAGS=${WHISPER_EXTRA_CXX_FLAGS} -DBUILD_SHARED_LIBS=ON
+      -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF
+      -DWHISPER_BUILD_SERVER=OFF -DGGML_NATIVE=OFF
       -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/cmake
       ${WHISPER_ADDITIONAL_CMAKE_ARGS})
 else()
@@ -196,18 +201,54 @@ if(WIN32)
   install(DIRECTORY ${INSTALL_DIR}/include
           DESTINATION ${CMAKE_SOURCE_DIR}/release)
   install(DIRECTORY ${INSTALL_DIR}/bin DESTINATION ${CMAKE_SOURCE_DIR}/release)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-base.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-blas.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/whisper.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-alderlake.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-haswell.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-icelake.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-sandybridge.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-skylakex.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-sse42.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
-  install(FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-x64.pdb DESTINATION ${CMAKE_SOURCE_DIR}/release/bin OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-base.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-blas.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/whisper.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-alderlake.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-haswell.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-icelake.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-sandybridge.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-skylakex.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-sse42.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-x64.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
 
   if(WHISPERCPP_WITH_HIPBLAS)
     message(STATUS "Setup HIP DLLs installation")

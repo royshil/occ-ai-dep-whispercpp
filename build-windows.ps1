@@ -11,39 +11,27 @@ if ($env:BUILD_WITH_ACCEL -eq $null) {
 $env:CMAKE_TOOLCHAIN_FILE=""
 $env:VCPKG_ROOT=""
 
+# find the Vulkan SDK version path in C:\VulkanSDK\
+$vulkanSdkPath = Get-ChildItem -Path "C:\VulkanSDK" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+$env:VULKAN_SDK_PATH="$vulkanSdkPath"
+
 $cmakeArgs = @()
-if ($env:BUILD_WITH_ACCEL -eq "cpu") {
-    $cmakeArgs += ("-DWHISPER_DYNAMIC_BACKENDS=OFF")
-    $zipFileName = "whispercpp-windows-cpu-$Version.zip"
-} elseif ($env:BUILD_WITH_ACCEL -eq "dynamic-cpu") {
-    $cmakeArgs += ("-DWHISPER_DYNAMIC_BACKENDS=ON")
-    $zipFileName = "whispercpp-windows-cpu-dynamic-$Version.zip"
-} elseif ($env:BUILD_WITH_ACCEL -eq "hipblas") {
-    $cmakeArgs += ("-DWHISPERCPP_WITH_HIPBLAS=ON", 
+if ($env:BUILD_WITH_ACCEL -eq "generic") {
+    $zipFileName = "whispercpp-windows-generic-$Version.zip"
+} elseif ($env:BUILD_WITH_ACCEL -eq "amd") {
+    $cmakeArgs += ("-DWHISPERCPP_AMD=ON",
         "-DCMAKE_GENERATOR=Unix Makefiles", 
         "-DCMAKE_C_COMPILER='$env:HIP_PATH\bin\clang.exe'",
         "-DCMAKE_CXX_COMPILER='$env:HIP_PATH\bin\clang++.exe'")
-    $zipFileName = "whispercpp-windows-hipblas-$Version.zip"
+    $zipFileName = "whispercpp-windows-amd-$Version.zip"
     $env:HIP_PLATFORM="amd"
-} elseif ($env:BUILD_WITH_ACCEL -eq "vulkan") {
+} elseif ($env:BUILD_WITH_ACCEL -eq "nvidia") {
     $cmakeArgs += (
-        "-DWHISPERCPP_WITH_VULKAN=ON",
-        "-DCMAKE_GENERATOR=Visual Studio 17 2022"
-    )
-    $zipFileName = "whispercpp-windows-vulkan-$Version.zip"
-    # find the Vulkan SDK version path in C:\VulkanSDK\
-    $vulkanSdkPath = Get-ChildItem -Path "C:\VulkanSDK" | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-    $env:VULKAN_SDK_PATH="$vulkanSdkPath"
-} elseif ($env:BUILD_WITH_ACCEL -eq "cuda") {
-    $cmakeArgs += (
-        "-DWHISPERCPP_WITH_CUDA=ON",
+        "-DWHISPERCPP_NVIDIA=ON",
         "-DCMAKE_GENERATOR=Visual Studio 17 2022",
         "-DCUDA_TOOLKIT_ROOT_DIR=$env:CUDA_TOOLKIT_ROOT_DIR"
     )
-    $zipFileName = "whispercpp-windows-cuda-$Version.zip"
-} else {
-    Write-Host "Unknown BUILD_WITH_ACCEL setting"
-    exit
+    $zipFileName = "whispercpp-windows-nvidia-$Version.zip"
 }
 
 if ($env:RUNNER_TEMP) {

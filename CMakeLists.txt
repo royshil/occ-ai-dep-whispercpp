@@ -5,9 +5,8 @@ project(Whispercpp_prebuilt)
 include(ExternalProject)
 include(FetchContent)
 
-option(WHISPERCPP_WITH_CUDA "Build Whisper with CUDA support" OFF)
-option(WHISPERCPP_WITH_HIPBLAS "Build Whisper with hipBLAS support" OFF)
-option(WHISPERCPP_WITH_VULKAN "Build Whisper with Vulkan support" OFF)
+option(WHISPERCPP_NVIDIA "Build Whisper with CUDA support" OFF)
+option(WHISPERCPP_AMD "Build Whisper with hipBLAS support" OFF)
 
 set(CMAKE_OSX_ARCHITECTURES_ "$ENV{MACOS_ARCH}")
 
@@ -83,7 +82,7 @@ if(APPLE)
 endif()
 
 if(WIN32)
-  if(NOT WHISPERCPP_WITH_HIPBLAS)
+  if(NOT WHISPERCPP_AMD)
     add_compile_options("$<$<NOT:$<CONFIG:Debug>>:/Zi>")
     add_link_options("$<$<NOT:$<CONFIG:Debug>>/DEBUG">)
     add_link_options("$<$<NOT:$<CONFIG:Debug>>/OPT:REF">)
@@ -105,31 +104,32 @@ if(WIN32)
   set(OpenBLAS_DIR ${openblas_SOURCE_DIR})
   message(STATUS "OpenBLAS_DIR: ${OpenBLAS_DIR}")
   set(WHISPER_ADDITIONAL_ENV "OPENBLAS_PATH=${openblas_SOURCE_DIR}")
-  set(WHISPER_ADDITIONAL_CMAKE_ARGS
-      -DGGML_BLAS=ON -DGGML_BLAS_VENDOR=OpenBLAS
-      -DBLAS_LIBRARIES=${OpenBLAS_DIR}/lib/libopenblas.lib
-      -DBLAS_INCLUDE_DIRS=${OpenBLAS_DIR}/include)
+  list(
+    APPEND
+    WHISPER_ADDITIONAL_CMAKE_ARGS
+    -DGGML_BLAS=ON
+    -DGGML_BLAS_VENDOR=OpenBLAS
+    -DBLAS_LIBRARIES=${OpenBLAS_DIR}/lib/libopenblas.lib
+    -DBLAS_INCLUDE_DIRS=${OpenBLAS_DIR}/include)
   set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
 
-  if(WHISPERCPP_WITH_CUDA)
+  if(NOT DEFINED ENV{VULKAN_SDK_PATH})
+    message(
+      FATAL_ERROR
+        "VULKAN_SDK_PATH is not set. Please set it to the root directory of your VulkanSDK installation, e.g. `C:/VulkanSDK/1.3.296.0`"
+    )
+  endif()
+
+  # Build with VULKAN
+  list(APPEND WHISPER_ADDITIONAL_ENV "VULKAN_SDK=$ENV{VULKAN_SDK_PATH}")
+  list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_VULKAN=ON)
+
+  if(WHISPERCPP_NVIDIA)
     # Build with CUDA
     set(WHISPER_ADDITIONAL_ENV "")
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=ON
          -DCMAKE_CUDA_ARCHITECTURES=all)
-    set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
-  elseif(WHISPERCPP_WITH_VULKAN)
-    if(NOT DEFINED ENV{VULKAN_SDK_PATH})
-      message(
-        FATAL_ERROR
-          "VULKAN_SDK_PATH is not set. Please set it to the root directory of your VulkanSDK installation, e.g. `C:/VulkanSDK/1.3.296.0`"
-      )
-    endif()
-
-    # Build with VULKAN
-    set(WHISPER_ADDITIONAL_ENV "VULKAN_SDK=$ENV{VULKAN_SDK_PATH}")
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_VULKAN=ON)
-    set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
-  elseif(WHISPERCPP_WITH_HIPBLAS)
+  elseif(WHISPERCPP_AMD)
     # Build with hipBLAS
     if(NOT DEFINED ENV{HIP_PATH})
       message(
@@ -143,24 +143,6 @@ if(WIN32)
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS
          -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
          -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DGGML_HIP=ON)
-    set(WHISPER_CMAKE_GENERATOR ${CMAKE_GENERATOR})
-  endif()
-
-  if(WHISPER_DYNAMIC_BACKENDS)
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_BACKEND_DL=ON
-         -DGGML_CPU_ALL_VARIANTS=ON)
-  else()
-    # Build for a skylake equivalent or newer CPU only - Assumes AVX2 support
-    # present
-    list(
-      APPEND
-      WHISPER_ADDITIONAL_CMAKE_ARGS
-      -DGGML_AVX=ON
-      -DGGML_AVX2=ON
-      -DGGML_BMI2=ON
-      -DGGML_F16C=ON
-      -DGGML_FMA=ON
-      -DGGML_SSE42=ON)
   endif()
 
   ExternalProject_Add(
@@ -187,8 +169,8 @@ if(WIN32)
       -DCMAKE_CXX_FLAGS=${WHISPER_EXTRA_CXX_FLAGS}
       -DCMAKE_C_FLAGS=${WHISPER_EXTRA_CXX_FLAGS} -DBUILD_SHARED_LIBS=ON
       -DWHISPER_BUILD_TESTS=OFF -DWHISPER_BUILD_EXAMPLES=OFF
-      -DWHISPER_BUILD_SERVER=OFF -DGGML_NATIVE=OFF
-      -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/cmake
+      -DWHISPER_BUILD_SERVER=OFF -DGGML_NATIVE=OFF -DGGML_BACKEND_DL=ON
+      -DGGML_CPU_ALL_VARIANTS=ON -DCMAKE_MODULE_PATH=${CMAKE_SOURCE_DIR}/cmake
       ${WHISPER_ADDITIONAL_CMAKE_ARGS})
 else()
   # On Linux and MacOS build a shared Whisper library
@@ -280,16 +262,14 @@ if(WIN32)
     DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
     OPTIONAL)
 
-  if(WHISPERCPP_WITH_HIPBLAS)
+  if(WHISPERCPP_AMD)
     message(STATUS "Setup HIP DLLs installation")
     set(HIPBLAS_DLLS
         "${HIP_PATH_STR}/bin/hipblas.dll" "${HIP_PATH_STR}/bin/rocblas.dll"
         "${HIP_PATH_STR}/bin/amdhip64_6.dll"
         "${HIP_PATH_STR}/bin/amd_comgr_2.dll")
     install(FILES ${HIPBLAS_DLLS} DESTINATION ${CMAKE_SOURCE_DIR}/release/bin)
-  elseif(WHISPERCPP_WITH_VULKAN)
-    message(STATUS "Vulkan does not require DLLs copy")
-  elseif(WHISPERCPP_WITH_CUDA)
+  elseif(WHISPERCPP_NVIDIA)
     # Check that CUDA_TOOLKIT_ROOT_DIR is set
     if(NOT DEFINED CUDA_TOOLKIT_ROOT_DIR)
       message(

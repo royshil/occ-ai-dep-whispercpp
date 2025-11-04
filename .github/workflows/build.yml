@@ -146,7 +146,7 @@ jobs:
       matrix:
         config:
           - "Release"
-        accel: [cpu, dynamic-cpu, cuda, vulkan, hipblas]
+        accel: [generic, nvidia, amd]
 
     steps:
       - name: "Get version"
@@ -176,21 +176,21 @@ jobs:
       #     sub-packages: '["cudart", "nvcc", "cublas", "cublas_dev", "visual_studio_integration"]'
       #     method: 'network'
       - name: Setup CUDA Toolkit
-        if: ${{ matrix.accel == 'cuda' }}
+        if: ${{ matrix.accel == 'nvidia' }}
         id: cuda-toolkit
         shell: pwsh
         run: ./setup_cuda.ps1
         env:
-            INPUT_CUDA_VERSION: '12.5.1'
+            INPUT_CUDA_VERSION: '12.8.1'
 
       - name: Set CUDA_TOOLKIT_ROOT_DIR if CUDA is installed
-        if: ${{ matrix.accel == 'cuda' }}
+        if: ${{ matrix.accel == 'nvidia' }}
         run: |
           "CUDA_TOOLKIT_ROOT_DIR=$env:CUDA_PATH" >> $env:GITHUB_ENV
 
       - name: Install AMD hip SDK v6.4.2
         id: depends-hipblas
-        if: ${{ matrix.accel == 'hipblas' }}
+        if: ${{ matrix.accel == 'amd' }}
         run: |
           $ErrorActionPreference = "Stop"
           write-host "Downloading AMD HIP SDK Installer"
@@ -201,18 +201,17 @@ jobs:
 
       - name: Verify ROCm
         id: verify-hipblas
-        if: ${{ matrix.accel == 'hipblas' }}
+        if: ${{ matrix.accel == 'amd' }}
         run: |
           & 'C:\Program Files\AMD\ROCm\*\bin\clang.exe' --version
 
       - name: Prepare hipBLAS environment
         id: prepare-hipblas
-        if: ${{ matrix.accel == 'hipblas' }}
+        if: ${{ matrix.accel == 'amd' }}
         run: |
           "HIP_PATH=$(Resolve-Path 'C:\Program Files\AMD\ROCm\*\bin\clang.exe' | split-path | split-path)" >> $env:GITHUB_ENV
 
       - name: "Install Vulkan SDK"
-        if: ${{ matrix.accel == 'vulkan' }}
         run: |
           $ErrorActionPreference = "Stop"
           write-host "Downloading Vulkan SDK"

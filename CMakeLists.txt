@@ -80,6 +80,7 @@ if(APPLE)
   )
 
   if(ENV${MACOS_ARCH} STREQUAL x86_64)
+    message(STATUS "Enabling all CPU backends for " ENV${MACOS_ARCH} " architecture")
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=ON)
   endif()
 endif()

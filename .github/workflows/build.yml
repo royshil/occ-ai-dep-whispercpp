@@ -64,7 +64,7 @@ jobs:
       matrix:
         config:
           - "Release"
-        accel: [generic, nvidia]
+        accel: [generic, nvidia, amd]
 
     defaults:
       run:
@@ -79,6 +79,20 @@ jobs:
           fi
           printf "version=%s" "$version" > "$GITHUB_OUTPUT"
         id: "get-version"
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
 
       - name: "Checkout"
         uses: "actions/checkout@v4"

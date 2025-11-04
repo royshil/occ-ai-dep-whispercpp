@@ -4,6 +4,8 @@
 # get version from first argument
 version=$1
 
+brew install openmp
+
 # configure
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
 

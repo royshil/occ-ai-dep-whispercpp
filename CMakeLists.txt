@@ -74,11 +74,19 @@ if(APPLE)
     -DWHISPER_COREML=ON
     -DWHISPER_COREML_ALLOW_FALLBACK=ON
     -DGGML_NATIVE=OFF
-    -DGGML_BACKEND_DL=ON
-    -DGGML_CPU_ALL_VARIANTS=ON)
+    -DGGML_BACKEND_DL=ON)
   set(WHISPER_EXTRA_CXX_FLAGS
       "-Wno-shorten-64-to-32 -Wno-unused-parameter -Wno-unused-function -Wno-unguarded-availability-new"
   )
+
+  if(ENV${MACOS_ARCH} STREQ "arm64")
+    # Whisper bug means that m4 variant won't build, so build for M1 (arm v8.2a
+    # with dotprod)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=OFF
+         -GGML_CPU_ARM_ARCH=armv8.2-a+dotprod)
+  else()
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=ON)
+  endif()
 endif()
 
 if(WIN32)

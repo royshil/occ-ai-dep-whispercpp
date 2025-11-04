@@ -64,7 +64,7 @@ jobs:
       matrix:
         config:
           - "Release"
-        accel: [generic, nvidia]
+        accel: [generic, nvidia, amd]
 
     defaults:
       run:
@@ -120,14 +120,11 @@ jobs:
 
       - name: "Install AMD hip SDK v6.4.2"
         if: ${{ matrix.accel == 'amd' }}
-        run: |
-          wget https://repo.radeon.com/amdgpu-install/6.4.2/ubuntu/jammy/amdgpu-install_6.4.60402-1_all.deb
-          sudo apt install ./amdgpu-install_6.4.60402-1_all.deb
-          sudo apt update
-          sudo apt install python3-setuptools python3-wheel
-          sudo usermod -a -G render,video $LOGNAME # Add the current user to the render and video groups
-          sudo apt install rocm
-          sudo apt update && sudo apt install hipblas
+        uses: neoblizz/rocm-setup@v0.1.4-beta
+        id: hip-sdk
+        with:
+          rocm: '6.4.2'
+          use-github-cache: true
 
       - name: "Run build-linux.sh"
         run: "chmod +x build-linux.sh && ./build-linux.sh ${{ matrix.config }} ${{ steps.get-version.outputs.version }}"

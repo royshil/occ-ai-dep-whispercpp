@@ -79,7 +79,7 @@ if(APPLE)
       "-Wno-shorten-64-to-32 -Wno-unused-parameter -Wno-unused-function -Wno-unguarded-availability-new"
   )
 
-  if($ENV{MACOS_ARCH} STREQ "arm64")
+  if($ENV{MACOS_ARCH} STREQUAL "arm64")
     # Whisper bug means that m4 variant won't build, so build for M1 (arm v8.2a
     # with dotprod)
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=OFF

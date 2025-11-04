@@ -115,6 +115,7 @@ jobs:
         id: cuda-toolkit
         with:
           cuda: '12.8.0'
+          method: 'network'
           linux-local-args: '["--toolkit", "--no-drm", "--no-opengl-libs", "--no-man-page", "--override"]'
 
       - name: "Install AMD hip SDK v6.4.2"

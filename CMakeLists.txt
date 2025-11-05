@@ -331,7 +331,7 @@ else()
     # copy the Metal shader library to the release directory
     install(
       FILES
-        ${BINARY_DIR}/src/${CMAKE_STATIC_LIBRARY_PREFIX}whisper.coreml${CMAKE_STATIC_LIBRARY_SUFFIX}
+        ${BINARY_DIR}/src/${CMAKE_SHARED_LIBRARY_PREFIX}whisper.coreml${CMAKE_SHARED_LIBRARY_SUFFIX}
       DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
   endif()
 endif(WIN32)

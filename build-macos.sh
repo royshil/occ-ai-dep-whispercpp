@@ -4,7 +4,9 @@
 # get version from first argument
 version=$1
 
-brew install openmp
+brew install libomp
+
+export OPENMP_PREFIX=$(brew --prefix libomp)
 
 # configure
 cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo

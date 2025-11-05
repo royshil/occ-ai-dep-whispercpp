@@ -86,13 +86,14 @@ jobs:
           # this might remove tools that are actually needed,
           # if set to "true" but frees about 6 GB
           tool-cache: false
+          # Needed to prevent running out of memory
+          swap-storage: false
 
           android: true
           dotnet: true
           haskell: true
           large-packages: true
           docker-images: true
-          swap-storage: true
 
       - name: "Checkout"
         uses: "actions/checkout@v4"

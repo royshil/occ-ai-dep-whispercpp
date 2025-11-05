@@ -39,16 +39,14 @@ if(UNIX AND NOT APPLE)
     -DGGML_NATIVE=OFF
     -DGGML_BACKEND_DL=ON
     -DGGML_CPU_ALL_VARIANTS=ON)
+  set(CMAKE_PARALLEL --parallel)
 
   if(WHISPERCPP_NVIDIA)
-    list(
-      APPEND
-      WHISPER_ADDITIONAL_CMAKE_ARGS
-      -DGGML_CUDA=ON
-      -DCMAKE_CUDA_ARCHITECTURES=all
-      -DCMAKE_CUDA_COMPILER=${CMAKE_CUDA_COMPILER}
-      -DCUDA_TOOLKIT_ROOT_DIR=${CUDA_TOOLKIT_ROOT_DIR})
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=ON
+         -DCMAKE_CUDA_ARCHITECTURES=all
+         -DCMAKE_CUDA_COMPILER=${CMAKE_CUDA_COMPILER})
     # -DGGML_SYCL_TARGET=NVIDIA)
+    set(CMAKE_PARALLEL "")
   elseif(WHISPERCPP_AMD)
     # cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     # set(WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
@@ -83,6 +81,7 @@ if(APPLE)
   set(WHISPER_EXTRA_CXX_FLAGS
       "-Wno-shorten-64-to-32 -Wno-unused-parameter -Wno-unused-function -Wno-unguarded-availability-new"
   )
+  set(CMAKE_PARALLEL --parallel)
 
   if($ENV{MACOS_ARCH} STREQUAL "arm64")
     # Whisper bug means that m4 variant won't build, so build for M1 (arm v8.2a
@@ -191,8 +190,8 @@ else()
     DOWNLOAD_EXTRACT_TIMESTAMP true
     GIT_REPOSITORY https://github.com/ggerganov/whisper.cpp.git
     GIT_TAG ${Whispercpp_Build_GIT_TAG}
-    BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> --parallel --config
-                  ${Whispercpp_BUILD_TYPE}
+    BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> ${CMAKE_PARALLEL}
+                  --config ${Whispercpp_BUILD_TYPE}
     BUILD_BYPRODUCTS
       <INSTALL_DIR>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}whisper${CMAKE_SHARED_LIBRARY_SUFFIX}
     CMAKE_GENERATOR ${CMAKE_GENERATOR}

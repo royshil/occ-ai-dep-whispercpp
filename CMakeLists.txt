@@ -84,15 +84,7 @@ if(APPLE)
   )
   set(CMAKE_PARALLEL --parallel)
 
-  if($ENV{MACOS_ARCH} STREQUAL "arm64")
-    # Whisper bug means that m4 variant won't build, so build for M1 (arm v8.2a
-    # with dotprod)
-    # list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=OFF
-    #      -DGGML_CPU_ARM_ARCH=armv8.2-a+dotprod)
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=ON)
-  else()
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=ON)
-  endif()
+  list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CPU_ALL_VARIANTS=ON)
 endif()
 
 if(WIN32)

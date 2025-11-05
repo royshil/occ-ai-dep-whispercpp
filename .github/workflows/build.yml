@@ -88,11 +88,11 @@ jobs:
           tool-cache: false
           # Needed to prevent running out of memory
           swap-storage: false
+          large-packages: false
 
           android: true
           dotnet: true
           haskell: true
-          large-packages: true
           docker-images: true
 
       - name: "Checkout"

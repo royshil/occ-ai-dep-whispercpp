@@ -47,6 +47,11 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}-MacOS-${{ matrix.architecture }}
+      
+      - name: "Install x86_64 homebrew"
+        if: ${{ matrix.architecture == 'x86_64' }}
+        run: |
+          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
       - name: "Checkout"
         uses: "actions/checkout@v4"

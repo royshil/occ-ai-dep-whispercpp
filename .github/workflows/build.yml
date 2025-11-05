@@ -88,11 +88,11 @@ jobs:
           tool-cache: false
           # Needed to prevent running out of memory
           swap-storage: false
-          large-packages: false
 
           android: true
           dotnet: true
           haskell: true
+          large-packages: true
           docker-images: true
 
       - name: "Checkout"
@@ -126,12 +126,11 @@ jobs:
 
       - name: "Install CUDA toolkit"
         if: ${{ matrix.accel == 'nvidia' }}
-        uses: Jimver/cuda-toolkit@v0.2.29
-        id: cuda-toolkit
-        with:
-          cuda: '12.8.0'
-          method: 'network'
-          linux-local-args: '["--toolkit", "--no-drm", "--no-opengl-libs", "--no-man-page", "--override"]'
+        run: |
+          wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.1-1_all.deb
+          sudo dpkg -i cuda-keyring_1.1-1_all.deb
+          sudo apt update
+          sudo apt -y install cuda-toolkit-12-8
 
       - name: "Install AMD hip SDK v6.4.2"
         if: ${{ matrix.accel == 'amd' }}

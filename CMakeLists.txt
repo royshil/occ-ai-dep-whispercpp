@@ -50,12 +50,8 @@ if(UNIX AND NOT APPLE)
   elseif(WHISPERCPP_AMD)
     # cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     # set(WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
-    list(
-      APPEND
-      WHISPER_ADDITIONAL_CMAKE_ARGS
-      # -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-      # -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-      -DGGML_HIP=ON)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=hipcc
+         -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON)
     # -DGGML_SYCL_TARGET=AMD)
   endif()
 endif()
@@ -237,8 +233,8 @@ else()
     BUILD_BYPRODUCTS
       <INSTALL_DIR>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}whisper${CMAKE_SHARED_LIBRARY_SUFFIX}
     CMAKE_GENERATOR ${CMAKE_GENERATOR}
-    INSTALL_COMMAND
-      ${CMAKE_COMMAND} --install <BINARY_DIR> --config ${Whispercpp_BUILD_TYPE}
+    INSTALL_COMMAND ${CMAKE_COMMAND} --install <BINARY_DIR> --config
+                    ${Whispercpp_BUILD_TYPE}
     CONFIGURE_COMMAND
       ${CMAKE_COMMAND} -E env ${WHISPER_ADDITIONAL_ENV} ${CMAKE_COMMAND}
       <SOURCE_DIR> -B <BINARY_DIR> -G ${CMAKE_GENERATOR}
@@ -383,20 +379,26 @@ else()
         ${BINARY_DIR}/src/${CMAKE_SHARED_LIBRARY_PREFIX}whisper.coreml${CMAKE_SHARED_LIBRARY_SUFFIX}
       DESTINATION ${CMAKE_SOURCE_DIR}/release/lib OPTIONAL)
     # Copy libomp to the release
-    install(
-      FILES
-      $ENV{OPENMP_PREFIX}/lib/libomp.dylib
-      DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
+    install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
+            DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
     file(GLOB LIBOMP_HEADERS "$ENV{OPENMP_PREFIX}/include/*.h")
-    install(
-      FILES
-      ${LIBOMP_HEADERS}
-      DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
+    install(FILES ${LIBOMP_HEADERS}
+            DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
   else()
-    install(DIRECTORY ${INSTALL_DIR}/lib64 DESTINATION ${CMAKE_SOURCE_DIR}/release)
+    install(
+      DIRECTORY ${INSTALL_DIR}/lib64
+      DESTINATION ${CMAKE_SOURCE_DIR}/release
+      OPTIONAL)
     file(GLOB LIBS_IN_LIB "${INSTALL_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    install(FILES ${LIBS_IN_LIB} DESTINATION ${CMAKE_SOURCE_DIR}/release/lib64)
-    file(GLOB LIBS_IN_LIB64 "${INSTALL_DIR}/lib64/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
-    install(FILES ${LIBS_IN_LIB64} DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
+    install(
+      FILES ${LIBS_IN_LIB}
+      DESTINATION ${CMAKE_SOURCE_DIR}/release/lib64
+      OPTIONAL)
+    file(GLOB LIBS_IN_LIB64
+         "${INSTALL_DIR}/lib64/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    install(
+      FILES ${LIBS_IN_LIB64}
+      DESTINATION ${CMAKE_SOURCE_DIR}/release/lib
+      OPTIONAL)
   endif()
 endif(WIN32)

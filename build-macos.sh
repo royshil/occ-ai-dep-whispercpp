@@ -7,10 +7,10 @@ version=$1
 if [ $MACOS_ARCH == "x86_64" ]
 then
     arch -x86_64 /usr/local/bin/brew install libomp
-    export OPENMP_PREFIX=$(arch -x86_64 brew --prefix libomp)
+    export OPENMP_PREFIX="/usr/local/opt/libomp"
 else
     brew install libomp
-    export OPENMP_PREFIX=$(brew --prefix libomp)
+    export OPENMP_PREFIX="/opt/homebrew/opt/libomp"
 fi
 
 # configure

@@ -191,8 +191,6 @@ else()
     CMAKE_GENERATOR ${CMAKE_GENERATOR}
     INSTALL_COMMAND
       ${CMAKE_COMMAND} --install <BINARY_DIR> --config ${Whispercpp_BUILD_TYPE}
-      && ${CMAKE_COMMAND} -E copy <SOURCE_DIR>/ggml/include/*
-      <INSTALL_DIR>/include
     CONFIGURE_COMMAND
       ${CMAKE_COMMAND} -E env ${WHISPER_ADDITIONAL_ENV} ${CMAKE_COMMAND}
       <SOURCE_DIR> -B <BINARY_DIR> -G ${CMAKE_GENERATOR}
@@ -207,6 +205,7 @@ else()
       -DWHISPER_BUILD_SERVER=OFF ${WHISPER_ADDITIONAL_CMAKE_ARGS})
 endif(WIN32)
 
+ExternalProject_Get_Property(Whispercpp_Build SOURCE_DIR)
 ExternalProject_Get_Property(Whispercpp_Build INSTALL_DIR)
 ExternalProject_Get_Property(Whispercpp_Build BINARY_DIR)
 
@@ -324,7 +323,9 @@ else()
   # the root of the project
   install(DIRECTORY ${INSTALL_DIR}/lib DESTINATION ${CMAKE_SOURCE_DIR}/release)
   install(DIRECTORY ${INSTALL_DIR}/bin DESTINATION ${CMAKE_SOURCE_DIR}/release)
-  install(DIRECTORY ${INSTALL_DIR}/include
+  install(DIRECTORY ${SOURCE_DIR}/include
+          DESTINATION ${CMAKE_SOURCE_DIR}/release)
+  install(DIRECTORY ${SOURCE_DIR}/ggml/include
           DESTINATION ${CMAKE_SOURCE_DIR}/release)
 
   if(APPLE)
@@ -343,5 +344,11 @@ else()
       FILES
       ${LIBOMP_HEADERS}
       DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
+  else()
+    install(DIRECTORY ${INSTALL_DIR}/lib64 DESTINATION ${CMAKE_SOURCE_DIR}/release)
+    file(GLOB LIBS_IN_LIB "${INSTALL_DIR}/lib/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    install(FILES ${LIBS_IN_LIB} DESTINATION ${CMAKE_SOURCE_DIR}/release/lib64)
+    file(GLOB LIBS_IN_LIB64 "${INSTALL_DIR}/lib64/*${CMAKE_SHARED_LIBRARY_SUFFIX}")
+    install(FILES ${LIBS_IN_LIB64} DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
   endif()
 endif(WIN32)

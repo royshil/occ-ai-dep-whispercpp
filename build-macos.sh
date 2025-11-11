@@ -23,9 +23,9 @@ cmake --install build
 
 if [[ $USE_COREML == "off" ]]
 then
-    $archive_name="whispercpp-macos-$MACOS_ARCH-metal$METAL_STD-no-coreml-$version"
+    archive_name="whispercpp-macos-$MACOS_ARCH-metal$METAL_STD-no-coreml-$version"
 else
-    $archive_name="whispercpp-macos-$MACOS_ARCH-metal$METAL_STD-$version"
+    archive_name="whispercpp-macos-$MACOS_ARCH-metal$METAL_STD-$version"
 fi
 
 # compress the release folder

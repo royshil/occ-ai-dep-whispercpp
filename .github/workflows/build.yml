@@ -31,6 +31,12 @@ jobs:
             metal-std: 2.4
           - architecture: arm64
             coreml: off
+          - metal-std: 3.0
+            coreml: off
+          - metal-std: 3.1
+            coreml: off
+          - metal-std: 3.2
+            coreml: off
 
     defaults:
       run:

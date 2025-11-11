@@ -78,7 +78,7 @@ jobs:
       - name: "Upload artifact"
         uses: "actions/upload-artifact@v4"
         with:
-          name: ${{ matrix.coreml && format('whispercpp-macos-{0}-metal{1}', matrix.architecture, matrix.metal-std) || format('whispercpp-macos-{0}-metal{1}-no-coreml', matrix.architecture, matrix.metal-std) }}
+          name: ${{ matrix.coreml == 'on' && format('whispercpp-macos-{0}-metal{1}', matrix.architecture, matrix.metal-std) || format('whispercpp-macos-{0}-metal{1}-no-coreml', matrix.architecture, matrix.metal-std) }}
           path: "*.tar.gz"
 
   BuildLinux:

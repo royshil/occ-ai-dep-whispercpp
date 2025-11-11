@@ -29,4 +29,4 @@ else
 fi
 
 # compress the release folder
-tar -czvf whispercpp-macos-$MACOS_ARCH-metal$METAL_STD-$version.tar.gz release
+tar -czvf $archive_name.tar.gz release

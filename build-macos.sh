@@ -3,6 +3,7 @@
 
 # get version from first argument
 version=$1
+verbose=$2
 
 if [ $MACOS_ARCH == "x86_64" ]
 then
@@ -13,10 +14,16 @@ else
     export OPENMP_PREFIX="/opt/homebrew/opt/libomp"
 fi
 
-# configure
-cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo
+if [[ $verbose == "--verbose" ]]
+then
+    extra_configure_args="--debug-output"
+    extra_build_args="--verbose"
+fi
 
-cmake --build build --config RelWithDebInfo
+# configure
+cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo $extra_configure_args
+
+cmake --build build --config RelWithDebInfo $extra_build_args
 
 # install
 cmake --install build

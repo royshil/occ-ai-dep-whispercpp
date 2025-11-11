@@ -1,0 +1,13 @@
+diff --git a/ggml/src/ggml-metal/CMakeLists.txt b/ggml/src/ggml-metal/CMakeLists.txt
+index 63418fe1..63e6aeb8 100644
+--- a/ggml/src/ggml-metal/CMakeLists.txt
++++ b/ggml/src/ggml-metal/CMakeLists.txt
+@@ -109,7 +109,7 @@ endif() # GGML_METAL_EMBED_LIBRARY
+ 
+ if (NOT GGML_METAL_EMBED_LIBRARY)
+     install(
+-        FILES src/ggml-metal/ggml-metal.metal
++        FILES ./ggml-metal.metal
+         PERMISSIONS
+             OWNER_READ
+             OWNER_WRITE

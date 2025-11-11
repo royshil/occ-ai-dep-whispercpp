@@ -69,11 +69,42 @@ if(APPLE)
     )
   endif(NOT DEFINED ENV{MACOS_ARCH})
 
-  option(METAL_STD "Which Metal version to target (2, 3, or 4)" 2)
+  # note: use 'ios-metal1.0' for 'Metal 1.0 (iOS)' standard
+  # note: use 'ios-metal1.1' for 'Metal 1.1 (iOS)' standard
+  # note: use 'ios-metal1.2' for 'Metal 1.2 (iOS)' standard
+  # note: use 'ios-metal2.0' for 'Metal 2.0 (iOS)' standard
+  # note: use 'ios-metal2.1' for 'Metal 2.1 (iOS)' standard
+  # note: use 'ios-metal2.2' for 'Metal 2.2 (iOS)' standard
+  # note: use 'ios-metal2.3' for 'Metal 2.3 (iOS)' standard
+  # note: use 'ios-metal2.4' for 'Metal 2.4 (iOS)' standard
+  # note: use 'macos-metal1.0' or 'osx-metal1.0' for 'Metal 1.0 (macOS)' standard
+  # note: use 'macos-metal1.1' or 'osx-metal1.1' for 'Metal 1.1 (macOS)' standard
+  # note: use 'macos-metal1.2' or 'osx-metal1.2' for 'Metal 1.2 (macOS)' standard
+  # note: use 'macos-metal2.0' or 'osx-metal2.0' for 'Metal 2.0 (macOS)' standard
+  # note: use 'macos-metal2.1' for 'Metal 2.1 (macOS)' standard
+  # note: use 'macos-metal2.2' for 'Metal 2.2 (macOS)' standard
+  # note: use 'macos-metal2.3' for 'Metal 2.3 (macOS)' standard
+  # note: use 'macos-metal2.4' for 'Metal 2.4 (macOS)' standard
+  # note: use 'metal3.0' for 'Metal 3.0' standard
+  # note: use 'metal3.1' for 'Metal 3.1' standard
+  # note: use 'metal3.2' for 'Metal 3.2' standard
+
+  # Presumably need newer XCode and/or a Tahoe (26) runner to get standard v4
+
+  option(METAL_STD "Which Metal version to target" macos-metal2.4)
   option(USE_COREML "Enable CoreML support" ON)
 
   if(DEFINED ENV{METAL_STD})
-    set(METAL_STD $ENV{METAL_STD})
+    if($ENV{METAL_STD} STREQUAL 2.4)
+      set(METAL_STD "macos-metal$ENV{METAL_STD}")
+    elseif($ENV{METAL_STD} STREQUAL 3.0 OR $ENV{METAL_STD} STREQUAL 3.1 OR $ENV{METAL_STD} STREQUAL 3.2)
+      set(METAL_STD "metal$ENV{METAL_STD}")
+    else()
+      message(
+      FATAL_ERROR
+        "Unsupported Metal standard $ENV{METAL_STD}"
+      )
+    endif()
   endif()
 
   if(DEFINED ENV{USE_COREML})
@@ -87,6 +118,7 @@ if(APPLE)
     -DGGML_METAL=ON
     -DGGML_METAL_MACOSX_VERSION_MIN=12.0
     -DGGML_METAL_STD=${METAL_STD}
+    -DGGML_METAL_EMBED_LIBRARY=OFF
     -DGGML_NATIVE=OFF
     -DGGML_BACKEND_DL=ON)
 
@@ -199,8 +231,9 @@ else()
     DOWNLOAD_EXTRACT_TIMESTAMP true
     GIT_REPOSITORY https://github.com/ggerganov/whisper.cpp.git
     GIT_TAG ${Whispercpp_Build_GIT_TAG}
+    PATCH_COMMAND git apply ${CMAKE_SOURCE_DIR}/patches/fix-ggml-metal-install-source-dir.patch
     BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> ${CMAKE_PARALLEL}
-                  --config ${Whispercpp_BUILD_TYPE}
+                  --config ${Whispercpp_BUILD_TYPE} --verbose
     BUILD_BYPRODUCTS
       <INSTALL_DIR>/lib/${CMAKE_SHARED_LIBRARY_PREFIX}whisper${CMAKE_SHARED_LIBRARY_SUFFIX}
     CMAKE_GENERATOR ${CMAKE_GENERATOR}
@@ -348,7 +381,7 @@ else()
     install(
       FILES
         ${BINARY_DIR}/src/${CMAKE_SHARED_LIBRARY_PREFIX}whisper.coreml${CMAKE_SHARED_LIBRARY_SUFFIX}
-      DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
+      DESTINATION ${CMAKE_SOURCE_DIR}/release/lib OPTIONAL)
     # Copy libomp to the release
     install(
       FILES

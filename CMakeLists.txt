@@ -69,16 +69,31 @@ if(APPLE)
     )
   endif(NOT DEFINED ENV{MACOS_ARCH})
 
+  option(METAL_STD "Which Metal version to target (2, 3, or 4)" 2)
+  option(USE_COREML "Enable CoreML support" ON)
+
+  if(DEFINED ENV{METAL_STD})
+    set(METAL_STD $ENV{METAL_STD})
+  endif()
+
+  if(DEFINED ENV{USE_COREML})
+    set(USE_COREML $ENV{USE_COREML})
+  endif()
+
   list(
     APPEND
     WHISPER_ADDITIONAL_CMAKE_ARGS
     -DCMAKE_PREFIX_PATH=$ENV{OPENMP_PREFIX}
     -DGGML_METAL=ON
     -DGGML_METAL_MACOSX_VERSION_MIN=12.0
-    -DWHISPER_COREML=ON
-    -DWHISPER_COREML_ALLOW_FALLBACK=ON
+    -DGGML_METAL_STD=${METAL_STD}
     -DGGML_NATIVE=OFF
     -DGGML_BACKEND_DL=ON)
+
+  if(${USE_COREML})
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DWHISPER_COREML=ON -DWHISPER_COREML_ALLOW_FALLBACK=ON)
+  endif()
+
   set(WHISPER_EXTRA_CXX_FLAGS
       "-Wno-shorten-64-to-32 -Wno-unused-parameter -Wno-unused-function -Wno-unguarded-availability-new"
   )

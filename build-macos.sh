@@ -21,5 +21,12 @@ cmake --build build --config RelWithDebInfo
 # install
 cmake --install build
 
+if [[ $USE_COREML == "off" ]]
+then
+    $archive_name="whispercpp-macos-$MACOS_ARCH-metal$METAL_STD-no-coreml-$version"
+else
+    $archive_name="whispercpp-macos-$MACOS_ARCH-metal$METAL_STD-$version"
+fi
+
 # compress the release folder
-tar -czvf whispercpp-macos-$MACOS_ARCH-$version.tar.gz release
+tar -czvf whispercpp-macos-$MACOS_ARCH-metal$METAL_STD-$version.tar.gz release

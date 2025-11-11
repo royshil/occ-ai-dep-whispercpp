@@ -4,7 +4,7 @@ Param(
 
 # check env var BUILD_WITH_ACCEL
 if ($env:BUILD_WITH_ACCEL -eq $null) {
-    Write-Host "Please set env var BUILD_WITH_ACCEL to 'cpu', 'dynamic-cpu', 'cuda', 'vulkan', or 'hipblas'."
+    Write-Host "Please set env var BUILD_WITH_ACCEL to 'generic', 'nvidia', or 'amd'."
     exit
 }
 

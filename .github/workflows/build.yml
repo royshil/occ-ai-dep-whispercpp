@@ -24,14 +24,12 @@ jobs:
           - "Release"
         architecture: [x86_64, arm64]
         coreml: [on, off]
-        metal-std: [2.4, 3.0, 3.1, 3.2]
+        metal-std: [2.4, "3.0", 3.1, 3.2]
         # See support.apple.com/en-gb/102894 for compatibility info
         exclude:
           - architecture: arm64
-            metal-std: 2.4
-          - architecture: arm64
             coreml: off
-          - metal-std: 3.0
+          - metal-std: "3.0"
             coreml: off
           - metal-std: 3.1
             coreml: off

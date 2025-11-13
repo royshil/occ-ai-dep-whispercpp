@@ -52,6 +52,7 @@ if(UNIX AND NOT APPLE)
     # set(WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=hipcc
          -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON)
+    set(WHISPER_EXTRA_CXX_FLAGS "-fPIC -g")
     # -DGGML_SYCL_TARGET=AMD)
   endif()
 endif()
@@ -65,6 +66,7 @@ if(APPLE)
     )
   endif(NOT DEFINED ENV{MACOS_ARCH})
 
+  # cmake-format: off
   # note: use 'ios-metal1.0' for 'Metal 1.0 (iOS)' standard
   # note: use 'ios-metal1.1' for 'Metal 1.1 (iOS)' standard
   # note: use 'ios-metal1.2' for 'Metal 1.2 (iOS)' standard
@@ -84,6 +86,7 @@ if(APPLE)
   # note: use 'metal3.0' for 'Metal 3.0' standard
   # note: use 'metal3.1' for 'Metal 3.1' standard
   # note: use 'metal3.2' for 'Metal 3.2' standard
+  # cmake-format: on
 
   # Presumably need newer XCode and/or a Tahoe (26) runner to get standard v4
 
@@ -93,13 +96,13 @@ if(APPLE)
   if(DEFINED ENV{METAL_STD})
     if($ENV{METAL_STD} STREQUAL 2.4)
       set(METAL_STD "macos-metal$ENV{METAL_STD}")
-    elseif($ENV{METAL_STD} STREQUAL 3.0 OR $ENV{METAL_STD} STREQUAL 3.1 OR $ENV{METAL_STD} STREQUAL 3.2)
+    elseif(
+      $ENV{METAL_STD} STREQUAL 3.0
+      OR $ENV{METAL_STD} STREQUAL 3.1
+      OR $ENV{METAL_STD} STREQUAL 3.2)
       set(METAL_STD "metal$ENV{METAL_STD}")
     else()
-      message(
-      FATAL_ERROR
-        "Unsupported Metal standard $ENV{METAL_STD}"
-      )
+      message(FATAL_ERROR "Unsupported Metal standard $ENV{METAL_STD}")
     endif()
   endif()
 
@@ -119,7 +122,8 @@ if(APPLE)
     -DGGML_BACKEND_DL=ON)
 
   if(${USE_COREML})
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DWHISPER_COREML=ON -DWHISPER_COREML_ALLOW_FALLBACK=ON)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DWHISPER_COREML=ON
+         -DWHISPER_COREML_ALLOW_FALLBACK=ON)
   endif()
 
   set(WHISPER_EXTRA_CXX_FLAGS
@@ -186,11 +190,11 @@ if(WIN32)
       )
     endif(NOT DEFINED ENV{HIP_PATH})
 
+    set(WHISPER_EXTRA_CXX_FLAGS "-g")
     cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     list(APPEND WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS
-         -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-         -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DGGML_HIP=ON)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=hipcc
+         -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON)
   endif()
 
   ExternalProject_Add(
@@ -227,7 +231,9 @@ else()
     DOWNLOAD_EXTRACT_TIMESTAMP true
     GIT_REPOSITORY https://github.com/ggerganov/whisper.cpp.git
     GIT_TAG ${Whispercpp_Build_GIT_TAG}
-    PATCH_COMMAND git apply ${CMAKE_SOURCE_DIR}/patches/fix-ggml-metal-install-source-dir.patch
+    PATCH_COMMAND
+      git apply
+      ${CMAKE_SOURCE_DIR}/patches/fix-ggml-metal-install-source-dir.patch
     BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> ${CMAKE_PARALLEL}
                   --config ${Whispercpp_BUILD_TYPE} --verbose
     BUILD_BYPRODUCTS
@@ -377,7 +383,8 @@ else()
     install(
       FILES
         ${BINARY_DIR}/src/${CMAKE_SHARED_LIBRARY_PREFIX}whisper.coreml${CMAKE_SHARED_LIBRARY_SUFFIX}
-      DESTINATION ${CMAKE_SOURCE_DIR}/release/lib OPTIONAL)
+      DESTINATION ${CMAKE_SOURCE_DIR}/release/lib
+      OPTIONAL)
     # Copy libomp to the release
     install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
             DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)

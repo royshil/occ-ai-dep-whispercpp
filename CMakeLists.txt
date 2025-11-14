@@ -19,6 +19,12 @@ else()
   set(Whispercpp_BUILD_TYPE Debug)
 endif()
 
+# List supported ROCm GPU targets, and also some unsupported ones that might work
+# See https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html
+set(SUPPORTED_AMDGPU_TARGETS gfx908;gfx90a;gfx942;gfx1030;gfx1100)
+set(UNSUPPORTED_AMDGPU_TARGETS gfx803;gfx900;gfx1010;gfx1031;gfx1032;gfx1101;gfx1102)
+set(AMDGPU_TARGETS "${SUPPORTED_AMDGPU_TARGETS};${UNSUPPORTED_AMDGPU_TARGETS}")
+
 if(UNIX AND NOT APPLE)
   # On linux add the `-fPIC` flag to the compiler
   set(WHISPER_EXTRA_CXX_FLAGS "-fPIC")
@@ -50,8 +56,10 @@ if(UNIX AND NOT APPLE)
   elseif(WHISPERCPP_AMD)
     # cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     # set(WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
+    
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=hipcc
-         -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON)
+         -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON
+         -DGPU_TARGETS=${AMDGPU_TARGETS})
     set(WHISPER_EXTRA_CXX_FLAGS "-fPIC -g")
     # -DGGML_SYCL_TARGET=AMD)
   endif()
@@ -194,7 +202,8 @@ if(WIN32)
     cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     list(APPEND WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=hipcc
-         -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON)
+         -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON
+         -DGPU_TARGETS=${AMDGPU_TARGETS})
   endif()
 
   ExternalProject_Add(

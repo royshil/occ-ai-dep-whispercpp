@@ -394,12 +394,33 @@ else()
         ${BINARY_DIR}/src/${CMAKE_SHARED_LIBRARY_PREFIX}whisper.coreml${CMAKE_SHARED_LIBRARY_SUFFIX}
       DESTINATION ${CMAKE_SOURCE_DIR}/release/lib
       OPTIONAL)
-    # Copy libomp to the release
-    install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
-            DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
-    file(GLOB LIBOMP_HEADERS "$ENV{OPENMP_PREFIX}/include/*.h")
-    install(FILES ${LIBOMP_HEADERS}
-            DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
+    # cmake-format off
+    # Fix libomp linking and copy it to the release
+    # if(${MACOS_ARCH} STREQUAL x86_64)
+    #   list(APPEND CPU_BACKENDS
+    #     libggml-cpu-x64.dylib
+    #     libggml-cpu-sse42.dylib
+    #     libggml-cpu-sandybridge.dylib
+    #     libggml-cpu-haswell.dylib
+    #     libggml-cpu-skylakex.dylib
+    #     libggml-cpu-icelake.dylib
+    #     libggml-cpu-alderlake.dylib
+    #     libggml-cpu-sapphirerapids.dylib)
+    # else()
+    #   list(APPEND CPU_BACKENDS
+    #     libggml-cpu-apple_m1.dylib
+    #     libggml-cpu-apple_m2_m3.dylib
+    #     libggml-cpu-apple_m4.dylib)
+    # endif()
+
+    # # TODO: update rpath for libomp in cpu backends
+
+    # install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
+    #         DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
+    # file(GLOB LIBOMP_HEADERS "$ENV{OPENMP_PREFIX}/include/*.h")
+    # install(FILES ${LIBOMP_HEADERS}
+    #         DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
+    # cmake-format on
   else()
     install(
       DIRECTORY ${INSTALL_DIR}/lib64

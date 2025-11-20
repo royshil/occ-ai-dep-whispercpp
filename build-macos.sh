@@ -21,9 +21,9 @@ then
 fi
 
 # configure
-cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo $extra_configure_args
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug $extra_configure_args
 
-cmake --build build --config RelWithDebInfo $extra_build_args
+cmake --build build --config Debug $extra_build_args
 
 # install
 cmake --install build

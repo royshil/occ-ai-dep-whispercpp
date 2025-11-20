@@ -252,7 +252,7 @@ else()
     GIT_TAG ${Whispercpp_Build_GIT_TAG}
     PATCH_COMMAND
       git apply
-      ${CMAKE_SOURCE_DIR}/patches/fix-ggml-metal-install-source-dir.patch
+      ${CMAKE_SOURCE_DIR}/patches/whispercpp-patches.patch
     BUILD_COMMAND ${CMAKE_COMMAND} --build <BINARY_DIR> ${CMAKE_PARALLEL}
                   --config ${Whispercpp_BUILD_TYPE} --verbose
     BUILD_BYPRODUCTS
@@ -423,30 +423,29 @@ else()
         libggml-cpu-apple_m4.so)
     endif()
     # Fix libomp and Accelerate load paths
-    message(STATUS "Fixing libomp name in ${WHISPER_COMPONENT_IMPORT_LIB}")
     foreach(CPU_BACKEND ${CPU_BACKENDS})
       add_custom_command(
         TARGET Whispercpp_Build
         POST_BUILD
         COMMAND
-          ${CMAKE_INSTALL_NAME_TOOL} -change "/usr/local/opt/libomp/lib/libomp.dylib"
+          ${CMAKE_INSTALL_NAME_TOOL} -change "$ENV{OPENMP_PREFIX}/lib/libomp.dylib"
           "@loader_path/../Frameworks/libomp.dylib"
           "${INSTALL_DIR}/bin/${CPU_BACKEND}")
-      add_custom_command(
-        TARGET Whispercpp_Build
-        POST_BUILD
-        COMMAND
-          ${CMAKE_INSTALL_NAME_TOOL} -change "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate"
-          "@loader_path/../Frameworks/Accelerate.framework"
-          "${INSTALL_DIR}/bin/${CPU_BACKEND}")
+      # add_custom_command(
+      #   TARGET Whispercpp_Build
+      #   POST_BUILD
+      #   COMMAND
+      #     ${CMAKE_INSTALL_NAME_TOOL} -change "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate"
+      #     "@rpath/Accelerate.framework"
+      #     "${INSTALL_DIR}/bin/${CPU_BACKEND}")
     endforeach(CPU_BACKEND ${CPU_BACKENDS})
-    add_custom_command(
-      TARGET Whispercpp_Build
-      POST_BUILD
-      COMMAND
-        ${CMAKE_INSTALL_NAME_TOOL} -change "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate"
-        "@loader_path/../Frameworks/Accelerate.framework"
-        "${INSTALL_DIR}/bin/libggml-blas.so")
+    # add_custom_command(
+    #   TARGET Whispercpp_Build
+    #   POST_BUILD
+    #   COMMAND
+    #     ${CMAKE_INSTALL_NAME_TOOL} -change "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate"
+    #     "@rpath/Accelerate.framework"
+    #     "${INSTALL_DIR}/bin/libggml-blas.so")
 
     install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
             DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
@@ -455,8 +454,8 @@ else()
             DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
 
     # Bundle Accelerate framework
-    install(DIRECTORY /System/Library/Frameworks/Accelerate.framework
-            DESTINATION ${CMAKE_SOURCE_DIR}/release/Frameworks)
+    # install(DIRECTORY /System/Library/Frameworks/Accelerate.framework
+    #         DESTINATION ${CMAKE_SOURCE_DIR}/release/Frameworks)
   else()
     install(
       DIRECTORY ${INSTALL_DIR}/lib64

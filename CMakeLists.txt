@@ -105,14 +105,22 @@ if(APPLE)
     if($ENV{METAL_STD} STREQUAL 2.4)
       set(METAL_STD "macos-metal$ENV{METAL_STD}")
       set(EMBED_METAL OFF)
-    elseif(
-      $ENV{METAL_STD} STREQUAL 3.0
-      OR $ENV{METAL_STD} STREQUAL 3.1
-      OR $ENV{METAL_STD} STREQUAL 3.2)
+      list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0)
+    elseif($ENV{METAL_STD} STREQUAL 3.0)
       set(METAL_STD "metal$ENV{METAL_STD}")
       set(EMBED_METAL OFF)
+      list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_OSX_DEPLOYMENT_TARGET=13.3)
+    elseif($ENV{METAL_STD} STREQUAL 3.1)
+      set(METAL_STD "metal$ENV{METAL_STD}")
+      set(EMBED_METAL OFF)
+      list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_OSX_DEPLOYMENT_TARGET=14.0)
+    elseif($ENV{METAL_STD} STREQUAL 3.2)
+      set(METAL_STD "metal$ENV{METAL_STD}")
+      set(EMBED_METAL OFF)
+      list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_OSX_DEPLOYMENT_TARGET=15.0)
     elseif($ENV{METAL_STD} STREQUAL embedded)
       set(EMBED_METAL ON)
+      list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0)
     else()
       message(FATAL_ERROR "Unsupported Metal standard $ENV{METAL_STD}")
     endif()
@@ -266,7 +274,6 @@ else()
       -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
       -DCMAKE_BUILD_TYPE=${Whispercpp_BUILD_TYPE}
       -DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
-      -DCMAKE_OSX_DEPLOYMENT_TARGET=12.0
       -DCMAKE_OSX_ARCHITECTURES=${CMAKE_OSX_ARCHITECTURES_}
       -DCMAKE_CXX_FLAGS=${WHISPER_EXTRA_CXX_FLAGS}
       -DCMAKE_C_FLAGS=${WHISPER_EXTRA_CXX_FLAGS} -DBUILD_SHARED_LIBS=ON
@@ -431,21 +438,7 @@ else()
           ${CMAKE_INSTALL_NAME_TOOL} -change "$ENV{OPENMP_PREFIX}/lib/libomp.dylib"
           "@loader_path/../Frameworks/libomp.dylib"
           "${INSTALL_DIR}/bin/${CPU_BACKEND}")
-      # add_custom_command(
-      #   TARGET Whispercpp_Build
-      #   POST_BUILD
-      #   COMMAND
-      #     ${CMAKE_INSTALL_NAME_TOOL} -change "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate"
-      #     "@rpath/Accelerate.framework"
-      #     "${INSTALL_DIR}/bin/${CPU_BACKEND}")
     endforeach(CPU_BACKEND ${CPU_BACKENDS})
-    # add_custom_command(
-    #   TARGET Whispercpp_Build
-    #   POST_BUILD
-    #   COMMAND
-    #     ${CMAKE_INSTALL_NAME_TOOL} -change "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate"
-    #     "@rpath/Accelerate.framework"
-    #     "${INSTALL_DIR}/bin/libggml-blas.so")
 
     install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
             DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
@@ -453,9 +446,6 @@ else()
     install(FILES ${LIBOMP_HEADERS}
             DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
 
-    # Bundle Accelerate framework
-    # install(DIRECTORY /System/Library/Frameworks/Accelerate.framework
-    #         DESTINATION ${CMAKE_SOURCE_DIR}/release/Frameworks)
   else()
     install(
       DIRECTORY ${INSTALL_DIR}/lib64

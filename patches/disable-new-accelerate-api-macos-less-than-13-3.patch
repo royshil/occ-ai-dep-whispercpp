@@ -1,0 +1,21 @@
+diff --git a/ggml/src/ggml-blas/CMakeLists.txt b/ggml/src/ggml-blas/CMakeLists.txt
+index 60ce4b1e..b6d2825d 100644
+--- a/ggml/src/ggml-blas/CMakeLists.txt
++++ b/ggml/src/ggml-blas/CMakeLists.txt
+@@ -16,8 +16,14 @@ if (BLAS_FOUND)
+                             )
+ 
+     if (${GGML_BLAS_VENDOR} MATCHES "Apple")
+-        add_compile_definitions(ACCELERATE_NEW_LAPACK)
+-        add_compile_definitions(ACCELERATE_LAPACK_ILP64)
++        string(COMPARE GREATER_EQUAL ${CMAKE_OSX_DEPLOYMENT_TARGET} 13.3 HAS_NEW_LAPACK)
++        if(${HAS_NEW_LAPACK})
++            message(STATUS "MacOS deployment target ${CMAKE_OSX_DEPLOYMENT_TARGET} has new LAPACK interface")
++            add_compile_definitions(ACCELERATE_NEW_LAPACK)
++            add_compile_definitions(ACCELERATE_LAPACK_ILP64)
++        else()
++            message(STATUS "MacOS deployment target ${CMAKE_OSX_DEPLOYMENT_TARGET} does not have new LAPACK interface")
++        endif()
+         add_compile_definitions(GGML_BLAS_USE_ACCELERATE)
+     elseif ("${BLAS_INCLUDE_DIRS}" STREQUAL "")
+         # BLAS_INCLUDE_DIRS is missing in FindBLAS.cmake.

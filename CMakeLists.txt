@@ -422,7 +422,7 @@ else()
         libggml-cpu-apple_m2_m3.so
         libggml-cpu-apple_m4.so)
     endif()
-    # Fix libomp.dylib load path
+    # Fix libomp and Accelerate load paths
     message(STATUS "Fixing libomp name in ${WHISPER_COMPONENT_IMPORT_LIB}")
     foreach(CPU_BACKEND ${CPU_BACKENDS})
       add_custom_command(
@@ -432,13 +432,31 @@ else()
           ${CMAKE_INSTALL_NAME_TOOL} -change "/usr/local/opt/libomp/lib/libomp.dylib"
           "@loader_path/../Frameworks/libomp.dylib"
           "${INSTALL_DIR}/bin/${CPU_BACKEND}")
+      add_custom_command(
+        TARGET Whispercpp_Build
+        POST_BUILD
+        COMMAND
+          ${CMAKE_INSTALL_NAME_TOOL} -change "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate"
+          "@loader_path/../Frameworks/Accelerate.framework"
+          "${INSTALL_DIR}/bin/${CPU_BACKEND}")
     endforeach(CPU_BACKEND ${CPU_BACKENDS})
+    add_custom_command(
+      TARGET Whispercpp_Build
+      POST_BUILD
+      COMMAND
+        ${CMAKE_INSTALL_NAME_TOOL} -change "/System/Library/Frameworks/Accelerate.framework/Versions/A/Accelerate"
+        "@loader_path/../Frameworks/Accelerate.framework"
+        "${INSTALL_DIR}/bin/libggml-blas.so")
 
     install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
             DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
     file(GLOB LIBOMP_HEADERS "$ENV{OPENMP_PREFIX}/include/*.h")
     install(FILES ${LIBOMP_HEADERS}
             DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
+
+    # Bundle Accelerate framework
+    install(DIRECTORY /System/Library/Frameworks/Accelerate.framework
+            DESTINATION ${CMAKE_SOURCE_DIR}/release/Frameworks)
   else()
     install(
       DIRECTORY ${INSTALL_DIR}/lib64

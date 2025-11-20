@@ -5,14 +5,14 @@
 version=$1
 verbose=$2
 
-# if [ $MACOS_ARCH == "x86_64" ]
-# then
-#     arch -x86_64 /usr/local/bin/brew install libomp
-#     export OPENMP_PREFIX="/usr/local/opt/libomp"
-# else
-#     brew install libomp
-#     export OPENMP_PREFIX="/opt/homebrew/opt/libomp"
-# fi
+if [ $MACOS_ARCH == "x86_64" ]
+then
+    arch -x86_64 /usr/local/bin/brew install libomp
+    export OPENMP_PREFIX="/usr/local/opt/libomp"
+else
+    brew install libomp
+    export OPENMP_PREFIX="/opt/homebrew/opt/libomp"
+fi
 
 if [[ $verbose == "--verbose" ]]
 then

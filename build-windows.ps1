@@ -20,7 +20,8 @@ if ($env:BUILD_WITH_ACCEL -eq "generic") {
     $zipFileName = "whispercpp-windows-generic-$Version.zip"
 } elseif ($env:BUILD_WITH_ACCEL -eq "amd") {
     $cmakeArgs += ("-DWHISPERCPP_AMD=ON",
-        "-DCMAKE_GENERATOR=Unix Makefiles", 
+        #"-DCMAKE_GENERATOR=Unix Makefiles",
+        "-DCMAKE_GENERATOR=Ninja",
         "-DCMAKE_C_COMPILER='$env:HIP_PATH\bin\clang.exe'",
         "-DCMAKE_CXX_COMPILER='$env:HIP_PATH\bin\clang++.exe'")
     $zipFileName = "whispercpp-windows-amd-$Version.zip"
@@ -41,9 +42,9 @@ if ($env:RUNNER_TEMP) {
 }
 
 # configure
-cmake -S . -B $build_dir -DCMAKE_BUILD_TYPE=RelWithDebInfo @cmakeArgs
+cmake -S . -B $build_dir -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_VERBOSE_MAKEFILE=ON --debug-output @cmakeArgs
 
-cmake --build $build_dir --config RelWithDebInfo
+cmake --build $build_dir --config RelWithDebInfo --verbose
 
 # install
 cmake --install $build_dir

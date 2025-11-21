@@ -14,9 +14,11 @@ Set up environment variables, e.g.:
 
 Acceleration options: `generic`, `nvidia` and `amd`
 
-For `amd` make sure `$env:HIP_PATH` points to the HIP installation folder, e.g. where `$env:HIP_PATH\bin\clang.exe` would be located.
+For `amd` make sure `$env:HIP_PATH` points to the HIP installation folder, e.g. where `$env:HIP_PATH\bin\clang.exe` would be located. See https://github.com/ggml-org/llama.cpp/blob/master/docs/build.md#hip for more details
 
 The HIP installer can be downloaded from https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-24.Q3-Win10-Win11-For-HIP.exe.
+
+You'll also need `make` which is most easily obtained by [installing Chocolatey](https://docs.chocolatey.org/en-us/choco/setup/) and then running `choco install make`
 
 Run the build script:
 

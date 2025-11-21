@@ -19,11 +19,12 @@ else()
   set(Whispercpp_BUILD_TYPE Debug)
 endif()
 
-# List supported ROCm GPU targets, and also some unsupported ones that might work
-# See https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html
-set(SUPPORTED_AMDGPU_TARGETS gfx908;gfx90a;gfx942;gfx1030;gfx1100)
-set(UNSUPPORTED_AMDGPU_TARGETS gfx803;gfx900;gfx1010;gfx1031;gfx1032;gfx1101;gfx1102)
-set(AMDGPU_TARGETS "${SUPPORTED_AMDGPU_TARGETS};${UNSUPPORTED_AMDGPU_TARGETS}")
+# List supported ROCm GPU targets in ROCm 6.4.2, and also some unsupported ones that might work
+# See https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html and https://rocm.docs.amd.com/en/docs-6.4.2/reference/gpu-arch-specs.html
+# gfx950 is supported in 7.1.0 but not 6.4.2 that we're using
+list(APPEND SUPPORTED_AMDGPU_TARGETS gfx908 gfx90a gfx942 gfx1030 gfx1100 gfx1200 gfx1201)
+list(APPEND UNSUPPORTED_AMDGPU_TARGETS gfx803 gfx900 gfx906 gfx950 gfx1010 gfx1011 gfx1012 gfx1031 gfx1032 gfx1101 gfx1102 gfx1150 gfx1151 gfx1152)
+list(APPEND AMDGPU_TARGETS "${SUPPORTED_AMDGPU_TARGETS};${UNSUPPORTED_AMDGPU_TARGETS}")
 
 if(UNIX AND NOT APPLE)
   # On linux add the `-fPIC` flag to the compiler

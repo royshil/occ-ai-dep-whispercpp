@@ -22,9 +22,10 @@ endif()
 # List supported ROCm GPU targets in ROCm 6.4.2, and also some unsupported ones that might work
 # See https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html and https://rocm.docs.amd.com/en/docs-6.4.2/reference/gpu-arch-specs.html
 # gfx950 is supported in 7.1.0 but not 6.4.2 that we're using
-set(SUPPORTED_AMDGPU_TARGETS gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1200;gfx1201)
-set(UNSUPPORTED_AMDGPU_TARGETS gfx803;gfx900;gfx906;gfx950;gfx1010;gfx1011;gfx1012;gfx1031;gfx1032;gfx1101;gfx1102;gfx1150;gfx1151;gfx1152)
-set(AMDGPU_TARGETS ${SUPPORTED_AMDGPU_TARGETS};${UNSUPPORTED_AMDGPU_TARGETS})
+set(SUPPORTED_AMDGPU_TARGETS "gfx908;gfx90a;gfx942;gfx1030;gfx1100;gfx1200;gfx1201")
+set(UNSUPPORTED_AMDGPU_TARGETS "gfx803;gfx900;gfx906;gfx950;gfx1010;gfx1011;gfx1012;gfx1031;gfx1032;gfx1101;gfx1102;gfx1150;gfx1151;gfx1152")
+set(AMDGPU_TARGETS "${SUPPORTED_AMDGPU_TARGETS};${UNSUPPORTED_AMDGPU_TARGETS}")
+message(STATUS "GPU TARGETS: ${AMDGPU_TARGETS}")
 
 if(UNIX AND NOT APPLE)
   # On linux add the `-fPIC` flag to the compiler
@@ -222,7 +223,7 @@ if(WIN32)
     list(APPEND WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
          -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DGGML_HIP=ON)
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_CACHE_ARGS -DGPU_TARGETS:STRING=${AMDGPU_TARGETS})
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_CACHE_ARGS -DGPU_TARGETS:STRING=${AMDGPU_TARGETS} -DCMAKE_HIP_ARCHITECTURES:STRING=${AMDGPU_TARGETS})
   endif()
 
   ExternalProject_Add(

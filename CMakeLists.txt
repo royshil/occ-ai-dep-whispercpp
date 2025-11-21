@@ -218,12 +218,12 @@ if(WIN32)
       )
     endif(NOT DEFINED ENV{HIP_PATH})
 
-    set(WHISPER_EXTRA_CXX_FLAGS "-g --no-warnings")
+    # TODO - turn GPU targets into a list and generate these offload-arch flags rather than hardcoding them
+    set(WHISPER_EXTRA_CXX_FLAGS "-g --no-warnings --offload-arch=gfx908 --offload-arch=gfx90a --offload-arch=gfx942 --offload-arch=gfx1030 --offload-arch=gfx1100 --offload-arch=gfx803 --offload-arch=gfx900 --offload-arch=gfx1010 --offload-arch=gfx1031 --offload-arch=gfx1032 --offload-arch=gfx1101 --offload-arch=gfx1102")
     cmake_path(SET HIP_PATH_STR NORMALIZE "$ENV{HIP_PATH}")
     list(APPEND WHISPER_ADDITIONAL_ENV "CMAKE_PREFIX_PATH=${HIP_PATH_STR}")
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
          -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} -DGGML_HIP=ON)
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_CACHE_ARGS -DGPU_TARGETS:STRING=${AMDGPU_TARGETS} -DCMAKE_HIP_ARCHITECTURES:STRING=${AMDGPU_TARGETS})
   endif()
 
   ExternalProject_Add(

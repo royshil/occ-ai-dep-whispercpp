@@ -7,6 +7,7 @@ verbose=$2
 
 if [ $MACOS_ARCH == "x86_64" ]
 then
+    sudo chown -R runner /usr/local/lib/pkgconfig
     arch -x86_64 /usr/local/bin/brew install libomp
     export OPENMP_PREFIX="/usr/local/opt/libomp"
 else

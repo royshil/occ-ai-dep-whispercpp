@@ -74,7 +74,7 @@ jobs:
           unzip $SDKFileName
           vulkansdk-macos-$SDKVersion.app/Contents/MacOS/vulkansdk-macOS-$SDKVersion --accept-licenses --default-answer --confirm-command install
           pushd ~/VulkanSDK/$SDKVersion
-          sudo python3 install_vulcan.py
+          sudo python3 install_vulkan.py
           popd
           popd
 

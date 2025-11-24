@@ -20,8 +20,7 @@ if ($env:BUILD_WITH_ACCEL -eq "generic") {
     $zipFileName = "whispercpp-windows-generic-$Version.zip"
 } elseif ($env:BUILD_WITH_ACCEL -eq "amd") {
     $cmakeArgs += ("-DWHISPERCPP_AMD=ON",
-        #"-DCMAKE_GENERATOR=Unix Makefiles",
-        "-DCMAKE_GENERATOR=Ninja",
+        "-DCMAKE_GENERATOR=Unix Makefiles",
         "-DCMAKE_C_COMPILER='$env:HIP_PATH\bin\clang.exe'",
         "-DCMAKE_CXX_COMPILER='$env:HIP_PATH\bin\clang++.exe'")
     $zipFileName = "whispercpp-windows-amd-$Version.zip"

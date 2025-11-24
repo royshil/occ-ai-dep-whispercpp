@@ -65,6 +65,19 @@ jobs:
         run: |
           arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
+      - name: "Install Vulkan SDK"
+        run: |
+          SDKVersion="1.4.328.1"
+          SDKFileName="vulkansdk-macos-$SDKVersion.zip"
+          curl --output /tmp/$SDKFileName  https://sdk.lunarg.com/sdk/download/$SDKVersion/mac/$SDKFileName
+          pushd /tmp
+          unzip $SDKFileName
+          vulkansdk-macos-$SDKVersion.app/Contents/MacOS/vulkansdk-macOS-$SDKVersion --accept-licenses --default-answer --confirm-command install
+          pushd ~/VulkanSDK/$SDKVersion
+          sudo python3 install_vulcan.py
+          popd
+          popd
+
       - name: "Checkout"
         uses: "actions/checkout@v4"
 

@@ -452,7 +452,7 @@ else()
       COMMAND
         ${CMAKE_INSTALL_NAME_TOOL} -change "@rpath/libvulkan.1.dylib"
         "@loader_path/../Frameworks/libvulkan.1.dylib"
-        "${INSTALL_DIR}/bin/libggml-vulkan.dylib")
+        "${INSTALL_DIR}/bin/libggml-vulkan.so")
 
     install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
             DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)

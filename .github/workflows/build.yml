@@ -252,11 +252,11 @@ jobs:
         run: |
           "HIP_PATH=$(Resolve-Path 'C:\Program Files\AMD\ROCm\*\bin\clang.exe' | split-path | split-path)" >> $env:GITHUB_ENV
 
-      - name: "Install Vulkan SDK"
+      - name: "Install Vulkan SDK (1.4.328.1)"
         run: |
           $ErrorActionPreference = "Stop"
           write-host "Downloading Vulkan SDK"
-          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.3.296.0/windows/VulkanSDK-1.3.296.0-Installer.exe" -OutFile "${env:RUNNER_TEMP}\VulkanSDK-1.3.296.0-Installer.exe"
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.328.1/windows/vulkansdk-windows-X64-1.4.328.1.exe" -OutFile "${env:RUNNER_TEMP}\VulkanSDK-1.4.328.1-Installer.exe"
           write-host "Installing Vulkan SDK"
           Start-Process "${env:RUNNER_TEMP}\VulkanSDK-1.3.296.0-Installer.exe" -ArgumentList '--accept-licenses --default-answer --confirm-command install' -NoNewWindow -Wait
           write-host "Completed Vulkan SDK installation"

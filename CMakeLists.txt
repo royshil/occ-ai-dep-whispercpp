@@ -139,6 +139,7 @@ if(APPLE)
     APPEND
     WHISPER_ADDITIONAL_CMAKE_ARGS
     -DCMAKE_PREFIX_PATH=$ENV{OPENMP_PREFIX}
+    -DGGML_VULKAN=ON
     -DGGML_METAL=ON
     -DGGML_METAL_MACOSX_VERSION_MIN=12.0
     -DGGML_METAL_STD=${METAL_STD}
@@ -445,12 +446,22 @@ else()
           "@loader_path/../Frameworks/libomp.dylib"
           "${INSTALL_DIR}/bin/${CPU_BACKEND}")
     endforeach(CPU_BACKEND ${CPU_BACKENDS})
+    add_custom_command(
+      TARGET Whispercpp_Build
+      POST_BUILD
+      COMMAND
+        ${CMAKE_INSTALL_NAME_TOOL} -change "@rpath/libvulkan.1.dylib"
+        "@loader_path/../Frameworks/libvulkan.1.dylib"
+        "${INSTALL_DIR}/bin/libggml-vulkan.dylib")
 
     install(FILES $ENV{OPENMP_PREFIX}/lib/libomp.dylib
             DESTINATION ${CMAKE_SOURCE_DIR}/release/lib)
     file(GLOB LIBOMP_HEADERS "$ENV{OPENMP_PREFIX}/include/*.h")
     install(FILES ${LIBOMP_HEADERS}
             DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
+    install(FILES /usr/local/lib/libvulkan.1.4.328.dylib
+            DESTINATION ${CMAKE_SOURCE_DIR}/release/lib
+            RENAME libvulkan.1.dylib)
 
   else()
     install(

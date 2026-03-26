@@ -23,7 +23,7 @@ You'll also need `make` which is most easily obtained by [installing Chocolatey]
 Run the build script:
 
 ```powershell
-> ./Build-Windows.ps1 -Version 0.0.11
+> ./Build-Windows.ps1 -Version 0.0.14
 ```
 
 ## Building on Mac OS
@@ -49,7 +49,7 @@ $ export USE_COREML=off
 Run the build script:
 
 ```bash
-$ ./build-macos.sh 0.0.11
+$ ./build-macos.sh 0.0.14
 ```
 
 ## Building on Linux
@@ -71,5 +71,5 @@ For all variants install the Vulkan and OpenCL SDKs, as well as OpenBLAS
 Run the build script:
 
 ```bash
-$ ./build-linux.sh 0.0.11
+$ ./build-linux.sh 0.0.14
 ```

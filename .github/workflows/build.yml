@@ -15,14 +15,14 @@ concurrency:
   cancel-in-progress: "${{ github.ref != 'refs/heads/main' }}"
 
 jobs:
-  BuildMac:
-    runs-on: "macos-14"
+  BuildMacIntel:
+    runs-on: "macos-14-intel"
 
     strategy:
       matrix:
         config:
           - "Release"
-        architecture: [x86_64, arm64]
+        architecture: [x86_64]
         coreml: [on, off]
         metal-std: [embedded, 2.4, "3.0", 3.1, 3.2]
         # See support.apple.com/en-gb/102894 for compatibility info
@@ -59,7 +59,86 @@ jobs:
         uses: hendrikmuhs/ccache-action@v1.2
         with:
           key: ${{ github.job }}-MacOS-${{ matrix.architecture }}
-      
+
+      - name: "Install x86_64 homebrew"
+        if: ${{ matrix.architecture == 'x86_64' }}
+        run: |
+          arch -x86_64 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+      - name: "Install Vulkan SDK"
+        run: |
+          SDKVersion="1.4.328.1"
+          SDKFileName="vulkansdk-macos-$SDKVersion.zip"
+          curl --output /tmp/$SDKFileName  https://sdk.lunarg.com/sdk/download/$SDKVersion/mac/$SDKFileName
+          pushd /tmp
+          unzip $SDKFileName
+          vulkansdk-macos-$SDKVersion.app/Contents/MacOS/vulkansdk-macOS-$SDKVersion --accept-licenses --default-answer --confirm-command install
+          pushd ~/VulkanSDK/$SDKVersion
+          sudo python3 install_vulkan.py
+          popd
+          popd
+
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+
+      - name: "Run build-macos.sh"
+        run: "./build-macos.sh ${{ steps.get-version.outputs.version }}"
+        env:
+          MACOS_ARCH: ${{ matrix.architecture }}
+          METAL_STD: ${{ matrix.metal-std }}
+          USE_COREML: ${{ matrix.coreml }}
+
+      - name: "Upload artifact"
+        uses: "actions/upload-artifact@v4"
+        with:
+          name: ${{ matrix.coreml == 'on' && format('whispercpp-macos-{0}-metal{1}', matrix.architecture, matrix.metal-std) || format('whispercpp-macos-{0}-metal{1}-no-coreml', matrix.architecture, matrix.metal-std) }}
+          path: "*.tar.gz"
+
+  BuildMacArm:
+    runs-on: "macos-14"
+
+    strategy:
+      matrix:
+        config:
+          - "Release"
+        architecture: [arm64]
+        coreml: [on, off]
+        metal-std: [embedded, 2.4, "3.0", 3.1, 3.2]
+        # See support.apple.com/en-gb/102894 for compatibility info
+        exclude:
+          - architecture: arm64
+            coreml: off
+          - metal-std: "3.0"
+            coreml: off
+          - metal-std: 3.1
+            coreml: off
+          - metal-std: 3.2
+            coreml: off
+
+    defaults:
+      run:
+        shell: "bash"
+
+    steps:
+      - name: "Get version"
+        run: |
+          if [[ $GITHUB_REF =~ ^refs/tags/ ]]
+          then version="${GITHUB_REF#refs/tags/}"
+          else version=main
+          fi
+          printf "version=%s" "$version" > "$GITHUB_OUTPUT"
+        id: "get-version"
+
+      - uses: maxim-lobanov/setup-xcode@v1.6.0
+        id: set-xcode-version
+        with:
+          xcode-version: 16.2
+
+      - name: ccache
+        uses: hendrikmuhs/ccache-action@v1.2
+        with:
+          key: ${{ github.job }}-MacOS-${{ matrix.architecture }}
+
       - name: "Install x86_64 homebrew"
         if: ${{ matrix.architecture == 'x86_64' }}
         run: |
@@ -291,7 +370,8 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
 
     needs:
-      - "BuildMac"
+      - "BuildMacIntel"
+      - "BuildMacArm"
       - "BuildLinux"
       - "BuildWindows"
 

@@ -10,7 +10,7 @@ option(WHISPERCPP_AMD "Build Whisper with hipBLAS support" OFF)
 
 set(CMAKE_OSX_ARCHITECTURES_ "$ENV{MACOS_ARCH}")
 
-set(Whispercpp_Build_GIT_TAG "v1.8.2")
+set(Whispercpp_Build_GIT_TAG "v1.8.4")
 
 if(${CMAKE_BUILD_TYPE} STREQUAL Release OR ${CMAKE_BUILD_TYPE} STREQUAL
                                            RelWithDebInfo)

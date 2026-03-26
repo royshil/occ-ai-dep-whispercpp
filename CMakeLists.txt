@@ -322,23 +322,7 @@ if(WIN32)
     DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
     OPTIONAL)
   install(
-    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-alderlake.pdb
-    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
-    OPTIONAL)
-  install(
-    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-haswell.pdb
-    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
-    OPTIONAL)
-  install(
-    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-icelake.pdb
-    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
-    OPTIONAL)
-  install(
-    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-sandybridge.pdb
-    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
-    OPTIONAL)
-  install(
-    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-skylakex.pdb
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-x64.pdb
     DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
     OPTIONAL)
   install(
@@ -346,7 +330,31 @@ if(WIN32)
     DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
     OPTIONAL)
   install(
-    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-x64.pdb
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-sandybridge.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-haswell.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-skylakex.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-cannonlake.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-cascadelake.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-icelake.pdb
+    DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
+    OPTIONAL)
+  install(
+    FILES ${BINARY_DIR}/bin/${Whispercpp_BUILD_TYPE}/ggml-cpu-alderlake.pdb
     DESTINATION ${CMAKE_SOURCE_DIR}/release/bin
     OPTIONAL)
 
@@ -426,9 +434,15 @@ else()
         libggml-cpu-x64.so
         libggml-cpu-sse42.so
         libggml-cpu-sandybridge.so
+        libggml-cpu-ivybridge.so
+        libggml-cpu-piledriver.so
         libggml-cpu-haswell.so
         libggml-cpu-skylakex.so
+        libggml-cpu-cannonlake.so
+        libggml-cpu-cascadelake.so
         libggml-cpu-icelake.so
+        libggml-cpu-cooperlake.so
+        libggml-cpu-zen4.so
         libggml-cpu-alderlake.so
         libggml-cpu-sapphirerapids.so)
     else()

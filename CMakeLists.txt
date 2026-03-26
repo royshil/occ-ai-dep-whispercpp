@@ -177,10 +177,10 @@ if(WIN32)
 
   # Build with OpenBLAS for all configurations
   set(OpenBLAS_URL
-      "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.26/OpenBLAS-0.3.26-x64.zip"
+      "https://github.com/OpenMathLib/OpenBLAS/releases/download/v0.3.32/OpenBLAS-0.3.32-x64.zip"
   )
   set(OpenBLAS_SHA256
-      "859C510A962A30EF1B01AA93CDE26FDB5FB1050F94AD5AB2802EBA3731935E06")
+      "FAFA367E9493649F5472A11AD7C41A1968BBDC4E28A16BE62254057489AD1E63")
   FetchContent_Declare(
     OpenBLAS
     URL ${OpenBLAS_URL}

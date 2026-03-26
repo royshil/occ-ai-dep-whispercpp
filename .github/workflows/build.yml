@@ -266,7 +266,6 @@ jobs:
         env:
           BUILD_WITH_ACCEL: ${{ matrix.accel }}
           LINUX_ARCH: "x86_64"
-          CMAKE_BUILD_PARALLEL_LEVEL: 1 # Limit parallel build jobs to keep RAM usage down
 
       - uses: "actions/upload-artifact@v4"
         with:

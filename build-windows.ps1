@@ -31,6 +31,7 @@ if ($env:BUILD_WITH_ACCEL -eq "generic") {
         "-DCMAKE_GENERATOR=Visual Studio 17 2022",
         "-DCUDA_TOOLKIT_ROOT_DIR=$env:CUDA_TOOLKIT_ROOT_DIR"
     )
+    $env:CUDAARCHS="50-virtual;60-virtual;61;70-virtual;75;80;86;89;120a-real"
     $zipFileName = "whispercpp-windows-nvidia-$Version.zip"
 }
 

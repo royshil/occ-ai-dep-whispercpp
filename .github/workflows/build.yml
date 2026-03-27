@@ -15,7 +15,6 @@ concurrency:
   cancel-in-progress: "${{ github.ref != 'refs/heads/main' }}"
 
 env:
-  AMD_GPU_TARGETS: "gfx1030;gfx1031;gfx1032;gfx1100;gfx1101;gfx1102;gfx1150;gfx1151;gfx1152;gfx1200;gfx1201"
   CUDAARCHS: "50-virtual;60-virtual;61;70-virtual;75;80;86;89;120a-real"
 
 jobs:
@@ -60,7 +59,7 @@ jobs:
           xcode-version: 16.2
 
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@v1.2.22
         with:
           key: ${{ github.job }}-MacOS-${{ matrix.architecture }}
 
@@ -83,7 +82,7 @@ jobs:
           popd
 
       - name: "Checkout"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@v6"
 
       - name: "Run build-macos.sh"
         run: "./build-macos.sh ${{ steps.get-version.outputs.version }}"
@@ -93,7 +92,7 @@ jobs:
           USE_COREML: ${{ matrix.coreml }}
 
       - name: "Upload artifact"
-        uses: "actions/upload-artifact@v4"
+        uses: "actions/upload-artifact@v7"
         with:
           name: ${{ matrix.coreml == 'on' && format('whispercpp-macos-{0}-metal{1}', matrix.architecture, matrix.metal-std) || format('whispercpp-macos-{0}-metal{1}-no-coreml', matrix.architecture, matrix.metal-std) }}
           path: "*.tar.gz"
@@ -139,7 +138,7 @@ jobs:
           xcode-version: 16.2
 
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@v1.2.22
         with:
           key: ${{ github.job }}-MacOS-${{ matrix.architecture }}
 
@@ -162,7 +161,7 @@ jobs:
           popd
 
       - name: "Checkout"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@v6"
 
       - name: "Run build-macos.sh"
         run: "./build-macos.sh ${{ steps.get-version.outputs.version }}"
@@ -172,7 +171,7 @@ jobs:
           USE_COREML: ${{ matrix.coreml }}
 
       - name: "Upload artifact"
-        uses: "actions/upload-artifact@v4"
+        uses: "actions/upload-artifact@v7"
         with:
           name: ${{ matrix.coreml == 'on' && format('whispercpp-macos-{0}-metal{1}', matrix.architecture, matrix.metal-std) || format('whispercpp-macos-{0}-metal{1}-no-coreml', matrix.architecture, matrix.metal-std) }}
           path: "*.tar.gz"
@@ -189,6 +188,9 @@ jobs:
     defaults:
       run:
         shell: "bash"
+
+    env:
+      AMD_GPU_TARGETS: "gfx908;gfx90a;gfx942;gfx950;gfx1030;gfx1100;gfx1101;gfx1200;gfx1201"
 
     steps:
       - name: "Get version"
@@ -216,7 +218,7 @@ jobs:
           docker-images: true
 
       - name: "Checkout"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@v6"
 
       - name: "Install OpenBLAS and OpenCL"
         run: |
@@ -271,7 +273,7 @@ jobs:
           BUILD_WITH_ACCEL: ${{ matrix.accel }}
           LINUX_ARCH: "x86_64"
 
-      - uses: "actions/upload-artifact@v4"
+      - uses: "actions/upload-artifact@v7"
         with:
           name: "whispercpp-linux-${{ matrix.config }}-${{ matrix.accel }}"
           path: "*.tar.gz"
@@ -285,6 +287,9 @@ jobs:
           - "Release"
         accel: [generic, nvidia, amd]
 
+    env:
+      AMD_GPU_TARGETS: "gfx1030;gfx1031;gfx1032;gfx1100;gfx1101;gfx1102;gfx1150;gfx1151;gfx1152;gfx1200;gfx1201"
+
     steps:
       - name: "Get version"
         shell: bash
@@ -297,10 +302,10 @@ jobs:
         id: "get-version"
 
       - name: "Checkout"
-        uses: "actions/checkout@v4"
+        uses: "actions/checkout@v6"
 
       - name: ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@v1.2.22
         with:
           key: ${{ github.job }}-Windows-${{ matrix.accel }}
 
@@ -356,7 +361,7 @@ jobs:
         env:
           BUILD_WITH_ACCEL: ${{ matrix.accel }}
 
-      - uses: "actions/upload-artifact@v4"
+      - uses: "actions/upload-artifact@v7"
         with:
           name: "whispercpp-windows-${{ matrix.accel }}"
           path: "*.zip"

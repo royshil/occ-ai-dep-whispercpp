@@ -14,6 +14,10 @@ concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: "${{ github.ref != 'refs/heads/main' }}"
 
+env:
+  AMD_GPU_TARGETS: "gfx1030;gfx1031;gfx1032;gfx1100;gfx1101;gfx1102;gfx1150;gfx1151;gfx1152;gfx1200;gfx1201"
+  CUDAARCHS: "50-virtual;60-virtual;61;70-virtual;75;80;86;89;120a-real"
+
 jobs:
   BuildMacIntel:
     runs-on: "macos-15-intel"
@@ -300,14 +304,6 @@ jobs:
         with:
           key: ${{ github.job }}-Windows-${{ matrix.accel }}
 
-      # - name: Install CUDA Toolkit
-      #   if: ${{ matrix.accel == 'cuda' }}
-      #   id: cuda-toolkit
-      #   uses: Jimver/cuda-toolkit@v0.2.21
-      #   with:
-      #     cuda: '12.5.1'
-      #     sub-packages: '["cudart", "nvcc", "cublas", "cublas_dev", "visual_studio_integration"]'
-      #     method: 'network'
       - name: Setup CUDA Toolkit
         if: ${{ matrix.accel == 'nvidia' }}
         id: cuda-toolkit

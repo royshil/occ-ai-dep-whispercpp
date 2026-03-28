@@ -256,16 +256,22 @@ jobs:
           export PATH=/usr/local/cuda-12.8/bin${PATH:+:${PATH}}
           export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
 
-      - name: "Install AMD hip SDK v6.4.2"
+      - name: "Install AMD hip SDK v7.2.1"
         if: ${{ matrix.accel == 'amd' }}
         run: |
-          wget https://repo.radeon.com/amdgpu-install/6.4.2/ubuntu/jammy/amdgpu-install_6.4.60402-1_all.deb
-          sudo apt install ./amdgpu-install_6.4.60402-1_all.deb
+          sudo mkdir --parents --mode=0755 /etc/apt/keyrings
+          wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
+          sudo tee /etc/apt/sources.list.d/rocm.list << EOF
+          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/7.2.1 jammy main
+          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/graphics/7.2.1/ubuntu jammy main
+          EOF
+          sudo tee /etc/apt/preferences.d/rocm-pin-600 << EOF
+          Package: *
+          Pin: release o=repo.radeon.com
+          Pin-Priority: 600
+          EOF
           sudo apt update
-          sudo apt install python3-setuptools python3-wheel
-          sudo usermod -a -G render,video $LOGNAME # Add the current user to the render and video groups
-          sudo apt install rocm
-          sudo apt update && sudo apt install hipblas
+          sudo apt install rocm rocm-hip-sdk rocm-hip-runtime-dev rocm-openmp-sdk rocm-hip-libraries
 
       - name: "Run build-linux.sh"
         run: "chmod +x build-linux.sh && ./build-linux.sh ${{ matrix.config }} ${{ steps.get-version.outputs.version }}"
@@ -322,13 +328,13 @@ jobs:
         run: |
           "CUDA_TOOLKIT_ROOT_DIR=$env:CUDA_PATH" >> $env:GITHUB_ENV
 
-      - name: Install AMD hip SDK v6.4.2
+      - name: Install AMD hip SDK v7.1.1
         id: depends-hipblas
         if: ${{ matrix.accel == 'amd' }}
         run: |
           $ErrorActionPreference = "Stop"
           write-host "Downloading AMD HIP SDK Installer"
-          Invoke-WebRequest -Uri "https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-25.Q3-Win10-Win11-For-HIP.exe" -OutFile "${env:RUNNER_TEMP}\rocm-install.exe"
+          Invoke-WebRequest -Uri "https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-26.Q1-Win11-For-HIP.exe" -OutFile "${env:RUNNER_TEMP}\rocm-install.exe"
           write-host "Installing AMD HIP SDK"
           Start-Process "${env:RUNNER_TEMP}\rocm-install.exe" -ArgumentList '-install' -NoNewWindow -Wait
           write-host "Completed AMD HIP SDK installation"

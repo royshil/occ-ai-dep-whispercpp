@@ -20,12 +20,7 @@ else()
 endif()
 
 if(WHISPERCPP_AMD)
-  # List supported ROCm GPU targets in ROCm 6.4.2, and also some unsupported ones that might work
-  # See https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html and https://rocm.docs.amd.com/en/docs-6.4.2/reference/gpu-arch-specs.html
-  # gfx950 is supported in 7.1.0 but not 6.4.2 that we're using
-  list(APPEND SUPPORTED_AMDGPU_TARGETS gfx908 gfx90a gfx942 gfx1030 gfx1100 gfx1200 gfx1201)
-  list(APPEND UNSUPPORTED_AMDGPU_TARGETS gfx803 gfx900 gfx906 gfx950 gfx1010 gfx1011 gfx1012 gfx1031 gfx1032 gfx1101 gfx1102 gfx1150 gfx1151 gfx1152)
-  list(APPEND AMDGPU_TARGETS ${SUPPORTED_AMDGPU_TARGETS} ${UNSUPPORTED_AMDGPU_TARGETS})
+  list(APPEND AMDGPU_TARGETS gfx908 gfx90a gfx942 gfx950 gfx1030 gfx1031 gfx1032 gfx1100 gfx1101 gfx1102 gfx1150 gfx1151 gfx1152 gfx1200 gfx1201)
   list(JOIN AMDGPU_TARGETS ";" AMDGPU_TARGETS_STRING)
   message(STATUS "AMD GPU TARGETS: ${AMDGPU_TARGETS_STRING}")
   foreach(TARGET ${AMDGPU_TARGETS})
@@ -359,8 +354,8 @@ if(WIN32)
     message(STATUS "Setup HIP DLLs installation")
     set(HIPBLAS_DLLS
         "${HIP_PATH_STR}/bin/hipblas.dll" "${HIP_PATH_STR}/bin/rocblas.dll"
-        "${HIP_PATH_STR}/bin/amdhip64_6.dll"
-        "${HIP_PATH_STR}/bin/amd_comgr_2.dll")
+        "${HIP_PATH_STR}/bin/amdhip64_7.dll"
+        "${HIP_PATH_STR}/bin/amd_comgr_3.dll")
     install(FILES ${HIPBLAS_DLLS} DESTINATION ${CMAKE_SOURCE_DIR}/release/bin)
   elseif(WHISPERCPP_NVIDIA)
     # Check that CUDA_TOOLKIT_ROOT_DIR is set

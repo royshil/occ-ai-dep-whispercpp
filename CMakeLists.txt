@@ -55,8 +55,13 @@ if(UNIX AND NOT APPLE)
          -DCMAKE_CUDA_COMPILER=${CMAKE_CUDA_COMPILER})
     # -DGGML_SYCL_TARGET=NVIDIA)
   elseif(WHISPERCPP_AMD)
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=hipcc
-         -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON)
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS
+         -DCMAKE_C_COMPILER=hipcc
+         -DCMAKE_CXX_COMPILER=hipcc
+         -DGGML_HIP=ON
+         -DCMAKE_C_COMPILER_LAUNCHER=ccache
+         -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+         -DHIP_CLANG_LAUNCHER=ccache)
     set(WHISPER_EXTRA_CXX_FLAGS "-fPIC --no-warnings ${AMDGPU_TARGET_FLAGS_STRING}")
     # -DGGML_SYCL_TARGET=AMD)
   endif()
@@ -255,12 +260,6 @@ else()
     DOWNLOAD_EXTRACT_TIMESTAMP true
     GIT_REPOSITORY https://github.com/ggerganov/whisper.cpp.git
     GIT_TAG ${Whispercpp_Build_GIT_TAG}
-    GIT_PROGRESS true
-    USES_TERMINAL_DOWNLOAD true
-    USES_TERMINAL_UPDATE true
-    USES_TERMINAL_BUILD true
-    USES_TERMINAL_INSTALL true
-    USES_TERMINAL_TEST true
     PATCH_COMMAND
       git apply
       ${CMAKE_SOURCE_DIR}/patches/whispercpp-patches.patch

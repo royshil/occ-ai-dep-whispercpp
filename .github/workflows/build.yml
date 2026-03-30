@@ -132,7 +132,7 @@ jobs:
           printf "version=%s" "$version" > "$GITHUB_OUTPUT"
         id: "get-version"
 
-      - uses: maxim-lobanov/setup-xcode@v1.6.0
+      - uses: maxim-lobanov/setup-xcode@v1.7.0
         id: set-xcode-version
         with:
           xcode-version: 16.2
@@ -218,6 +218,12 @@ jobs:
           large-packages: true
           docker-images: true
 
+      - name: ccache
+        if: ${{ matrix.accel == 'amd' }}
+        uses: hendrikmuhs/ccache-action@v1.2.22
+        with:
+          key: ${{ github.job }}-Linux-${{ matrix.accel }}
+
       - name: "Checkout"
         uses: "actions/checkout@v6"
 
@@ -280,11 +286,13 @@ jobs:
         env:
           BUILD_WITH_ACCEL: ${{ matrix.accel }}
           LINUX_ARCH: "x86_64"
+        timeout-minutes: 340 # Ensure we have time to upload ccache cache if build is going to time out
 
       - uses: "actions/upload-artifact@v7"
         with:
           name: "whispercpp-linux-${{ matrix.config }}-${{ matrix.accel }}"
           path: "*.tar.gz"
+        if: ${{ success() }}
 
   BuildWindows:
     runs-on: "windows-2022"

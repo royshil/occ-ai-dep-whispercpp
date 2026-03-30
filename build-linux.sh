@@ -18,7 +18,7 @@ fi
 # configure
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo $CMAKE_ARGS
 
-cmake --build build --config RelWithDebInfo
+cmake --build build --config RelWithDebInfo --parallel
 
 # install
 cmake --install build

@@ -50,7 +50,7 @@ if(UNIX AND NOT APPLE)
     -DGGML_NATIVE=OFF
     -DGGML_BACKEND_DL=ON
     -DGGML_CPU_ALL_VARIANTS=ON)
-  set(CMAKE_PARALLEL --parallel 3)
+  #set(CMAKE_PARALLEL --parallel 3)
 
   if(WHISPERCPP_NVIDIA)
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=ON
@@ -257,6 +257,12 @@ else()
     DOWNLOAD_EXTRACT_TIMESTAMP true
     GIT_REPOSITORY https://github.com/ggerganov/whisper.cpp.git
     GIT_TAG ${Whispercpp_Build_GIT_TAG}
+    GIT_PROGRESS true
+    USES_TERMINAL_DOWNLOAD true
+    USES_TERMINAL_UPDATE true
+    USES_TERMINAL_BUILD true
+    USES_TERMINAL_INSTALL true
+    USES_TERMINAL_TEST true
     PATCH_COMMAND
       git apply
       ${CMAKE_SOURCE_DIR}/patches/whispercpp-patches.patch

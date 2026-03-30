@@ -353,7 +353,7 @@ if(WIN32)
   if(WHISPERCPP_AMD)
     message(STATUS "Setup HIP DLLs installation")
     set(HIPBLAS_DLLS
-        "${HIP_PATH_STR}/bin/hipblas.dll" "${HIP_PATH_STR}/bin/rocblas.dll"
+        "${HIP_PATH_STR}/bin/libhipblas.dll" "${HIP_PATH_STR}/bin/rocblas.dll"
         "${HIP_PATH_STR}/bin/amdhip64_7.dll"
         "${HIP_PATH_STR}/bin/amd_comgr_3.dll")
     install(FILES ${HIPBLAS_DLLS} DESTINATION ${CMAKE_SOURCE_DIR}/release/bin)

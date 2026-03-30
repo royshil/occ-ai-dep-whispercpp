@@ -42,15 +42,13 @@ if(UNIX AND NOT APPLE)
     # Vulkan
     -DGGML_VULKAN=ON
     # OpenCL
-    -DGGML_OPENCL=OFF
-    # -DGGML_OPENCL=ON
-    # -DGGML_OPENCL_EMBED_KERNELS=ON
-    # -DGGML_OPENCL_USE_ADRENO_KERNELS=OFF
+    -DGGML_OPENCL=ON
+    -DGGML_OPENCL_EMBED_KERNELS=ON
+    -DGGML_OPENCL_USE_ADRENO_KERNELS=OFF
     # SYCL -DGGML_SYCL=ON Dynamic backends
     -DGGML_NATIVE=OFF
     -DGGML_BACKEND_DL=ON
     -DGGML_CPU_ALL_VARIANTS=ON)
-  #set(CMAKE_PARALLEL --parallel 3)
 
   if(WHISPERCPP_NVIDIA)
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=ON
@@ -472,7 +470,8 @@ else()
     file(GLOB LIBOMP_HEADERS "$ENV{OPENMP_PREFIX}/include/*.h")
     install(FILES ${LIBOMP_HEADERS}
             DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
-    install(FILES /usr/local/lib/libvulkan.1.4.328.dylib
+    set(VULKAN_DYLIB_PATH "/usr/local/lib/libvulkan.$ENV{VULKAN_SDK_VERSION}.dylib")
+    install(FILES ${VULKAN_DYLIB_PATH}
             DESTINATION ${CMAKE_SOURCE_DIR}/release/lib
             RENAME libvulkan.1.dylib)
 

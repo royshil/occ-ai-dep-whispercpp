@@ -149,7 +149,7 @@ jobs:
 
       - name: "Install Vulkan SDK"
         run: |
-          SDKVersion="1.4.328.1"
+          SDKVersion="1.4.341.1"
           SDKFileName="vulkansdk-macos-$SDKVersion.zip"
           curl --output /tmp/$SDKFileName  https://sdk.lunarg.com/sdk/download/$SDKVersion/mac/$SDKFileName
           pushd /tmp
@@ -159,6 +159,7 @@ jobs:
           sudo python3 install_vulkan.py
           popd
           popd
+          echo "VULKAN_SDK_VERSION=1.4.341" >> $env:GITHUB_ENV
 
       - name: "Checkout"
         uses: "actions/checkout@v6"
@@ -358,10 +359,11 @@ jobs:
           $SDKVersion = "1.4.341.1"
           $SDKFileName = "vulkansdk-windows-X64-${SDKVersion}.exe"
           write-host "Downloading Vulkan SDK"
-          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.341.1/windows/$SDKFileName" -OutFile "${env:RUNNER_TEMP}\$SDKFileName"
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/${SDKVersion}/windows/$SDKFileName" -OutFile "${env:RUNNER_TEMP}\$SDKFileName"
           write-host "Installing Vulkan SDK"
           Start-Process "${env:RUNNER_TEMP}\$SDKFileName" -ArgumentList '--accept-licenses --default-answer --confirm-command install' -NoNewWindow -Wait
           write-host "Completed Vulkan SDK installation"
+          "VULKAN_SDK_VERSION=$SDKVersion" >> $env:GITHUB_ENV
 
       - name: "Run Build-Windows.ps1"
         run: "./Build-Windows.ps1 -Version ${{ steps.get-version.outputs.version }}"

@@ -7,7 +7,7 @@ version=$1
 # check env var BUILD_WITH_ACCEL
 if [ "$BUILD_WITH_ACCEL" = "nvidia" ]; then
     echo "Building with NVidia specific acceleration options"
-    export CMAKE_ARGS="$CMAKE_ARGS -DWHISPERCPP_NVIDIA=ON -DCMAKE_CUDA_COMPILER=/usr/local/cuda-12.8/bin/nvcc"
+    export CMAKE_ARGS="$CMAKE_ARGS -DWHISPERCPP_NVIDIA=ON -DCMAKE_CUDA_COMPILER=${CUDA_TOOLKIT_ROOT_DIR}/bin/nvcc"
 elif [ "$BUILD_WITH_ACCEL" = "amd" ]; then
     echo "Building with AMD specific acceleration options"
     export CMAKE_ARGS="$CMAKE_ARGS -DWHISPERCPP_AMD=ON"
@@ -16,9 +16,9 @@ else
 fi
 
 # configure
-cmake -S . -B build -DCMAKE_BUILD_TYPE=RelWithDebInfo $CMAKE_ARGS
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo $CMAKE_ARGS
 
-cmake --build build --config RelWithDebInfo
+cmake --build build --config RelWithDebInfo --parallel
 
 # install
 cmake --install build

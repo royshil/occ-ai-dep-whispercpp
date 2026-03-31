@@ -132,7 +132,7 @@ jobs:
           printf "version=%s" "$version" > "$GITHUB_OUTPUT"
         id: "get-version"
 
-      - uses: maxim-lobanov/setup-xcode@v1.6.0
+      - uses: maxim-lobanov/setup-xcode@v1.7.0
         id: set-xcode-version
         with:
           xcode-version: 16.2
@@ -149,7 +149,7 @@ jobs:
 
       - name: "Install Vulkan SDK"
         run: |
-          SDKVersion="1.4.328.1"
+          SDKVersion="1.4.341.1"
           SDKFileName="vulkansdk-macos-$SDKVersion.zip"
           curl --output /tmp/$SDKFileName  https://sdk.lunarg.com/sdk/download/$SDKVersion/mac/$SDKFileName
           pushd /tmp
@@ -159,6 +159,7 @@ jobs:
           sudo python3 install_vulkan.py
           popd
           popd
+          echo "VULKAN_SDK_VERSION=1.4.341" >> $env:GITHUB_ENV
 
       - name: "Checkout"
         uses: "actions/checkout@v6"
@@ -217,6 +218,12 @@ jobs:
           large-packages: true
           docker-images: true
 
+      - name: ccache
+        if: ${{ matrix.accel == 'amd' }}
+        uses: hendrikmuhs/ccache-action@v1.2.22
+        with:
+          key: ${{ github.job }}-Linux-${{ matrix.accel }}
+
       - name: "Checkout"
         uses: "actions/checkout@v6"
 
@@ -255,28 +262,37 @@ jobs:
           sudo apt -y install cuda-toolkit-12-8
           export PATH=/usr/local/cuda-12.8/bin${PATH:+:${PATH}}
           export LD_LIBRARY_PATH=/usr/local/cuda-12.8/lib ${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}
+          echo "CUDA_TOOLKIT_ROOT_DIR=/usr/local/cuda-12.8" >> $GITHUB_ENV
 
-      - name: "Install AMD hip SDK v6.4.2"
+      - name: "Install AMD hip SDK v7.2.1"
         if: ${{ matrix.accel == 'amd' }}
         run: |
-          wget https://repo.radeon.com/amdgpu-install/6.4.2/ubuntu/jammy/amdgpu-install_6.4.60402-1_all.deb
-          sudo apt install ./amdgpu-install_6.4.60402-1_all.deb
+          sudo mkdir --parents --mode=0755 /etc/apt/keyrings
+          wget https://repo.radeon.com/rocm/rocm.gpg.key -O - | gpg --dearmor | sudo tee /etc/apt/keyrings/rocm.gpg > /dev/null
+          sudo tee /etc/apt/sources.list.d/rocm.list << EOF
+          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/rocm/apt/7.2.1 jammy main
+          deb [arch=amd64 signed-by=/etc/apt/keyrings/rocm.gpg] https://repo.radeon.com/graphics/7.2.1/ubuntu jammy main
+          EOF
+          sudo tee /etc/apt/preferences.d/rocm-pin-600 << EOF
+          Package: *
+          Pin: release o=repo.radeon.com
+          Pin-Priority: 600
+          EOF
           sudo apt update
-          sudo apt install python3-setuptools python3-wheel
-          sudo usermod -a -G render,video $LOGNAME # Add the current user to the render and video groups
-          sudo apt install rocm
-          sudo apt update && sudo apt install hipblas
+          sudo apt install rocm rocm-hip-sdk rocm-hip-runtime-dev rocm-openmp-sdk rocm-hip-libraries
 
       - name: "Run build-linux.sh"
         run: "chmod +x build-linux.sh && ./build-linux.sh ${{ matrix.config }} ${{ steps.get-version.outputs.version }}"
         env:
           BUILD_WITH_ACCEL: ${{ matrix.accel }}
           LINUX_ARCH: "x86_64"
+        timeout-minutes: 340 # Ensure we have time to upload ccache cache if build is going to time out
 
       - uses: "actions/upload-artifact@v7"
         with:
           name: "whispercpp-linux-${{ matrix.config }}-${{ matrix.accel }}"
           path: "*.tar.gz"
+        if: ${{ success() }}
 
   BuildWindows:
     runs-on: "windows-2022"
@@ -322,13 +338,13 @@ jobs:
         run: |
           "CUDA_TOOLKIT_ROOT_DIR=$env:CUDA_PATH" >> $env:GITHUB_ENV
 
-      - name: Install AMD hip SDK v6.4.2
+      - name: Install AMD hip SDK v7.1.1
         id: depends-hipblas
         if: ${{ matrix.accel == 'amd' }}
         run: |
           $ErrorActionPreference = "Stop"
           write-host "Downloading AMD HIP SDK Installer"
-          Invoke-WebRequest -Uri "https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-25.Q3-Win10-Win11-For-HIP.exe" -OutFile "${env:RUNNER_TEMP}\rocm-install.exe"
+          Invoke-WebRequest -Uri "https://download.amd.com/developer/eula/rocm-hub/AMD-Software-PRO-Edition-26.Q1-Win11-For-HIP.exe" -OutFile "${env:RUNNER_TEMP}\rocm-install.exe"
           write-host "Installing AMD HIP SDK"
           Start-Process "${env:RUNNER_TEMP}\rocm-install.exe" -ArgumentList '-install' -NoNewWindow -Wait
           write-host "Completed AMD HIP SDK installation"
@@ -351,10 +367,11 @@ jobs:
           $SDKVersion = "1.4.341.1"
           $SDKFileName = "vulkansdk-windows-X64-${SDKVersion}.exe"
           write-host "Downloading Vulkan SDK"
-          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/1.4.341.1/windows/$SDKFileName" -OutFile "${env:RUNNER_TEMP}\$SDKFileName"
+          Invoke-WebRequest -Uri "https://sdk.lunarg.com/sdk/download/${SDKVersion}/windows/$SDKFileName" -OutFile "${env:RUNNER_TEMP}\$SDKFileName"
           write-host "Installing Vulkan SDK"
           Start-Process "${env:RUNNER_TEMP}\$SDKFileName" -ArgumentList '--accept-licenses --default-answer --confirm-command install' -NoNewWindow -Wait
           write-host "Completed Vulkan SDK installation"
+          "VULKAN_SDK_VERSION=$SDKVersion" >> $env:GITHUB_ENV
 
       - name: "Run Build-Windows.ps1"
         run: "./Build-Windows.ps1 -Version ${{ steps.get-version.outputs.version }}"

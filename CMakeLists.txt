@@ -20,12 +20,7 @@ else()
 endif()
 
 if(WHISPERCPP_AMD)
-  # List supported ROCm GPU targets in ROCm 6.4.2, and also some unsupported ones that might work
-  # See https://rocm.docs.amd.com/en/latest/compatibility/compatibility-matrix.html and https://rocm.docs.amd.com/en/docs-6.4.2/reference/gpu-arch-specs.html
-  # gfx950 is supported in 7.1.0 but not 6.4.2 that we're using
-  list(APPEND SUPPORTED_AMDGPU_TARGETS gfx908 gfx90a gfx942 gfx1030 gfx1100 gfx1200 gfx1201)
-  list(APPEND UNSUPPORTED_AMDGPU_TARGETS gfx803 gfx900 gfx906 gfx950 gfx1010 gfx1011 gfx1012 gfx1031 gfx1032 gfx1101 gfx1102 gfx1150 gfx1151 gfx1152)
-  list(APPEND AMDGPU_TARGETS ${SUPPORTED_AMDGPU_TARGETS} ${UNSUPPORTED_AMDGPU_TARGETS})
+  list(APPEND AMDGPU_TARGETS gfx1030 gfx1031 gfx1032 gfx1100 gfx1101 gfx1102 gfx1150 gfx1151 gfx1152 gfx1200 gfx1201)
   list(JOIN AMDGPU_TARGETS ";" AMDGPU_TARGETS_STRING)
   message(STATUS "AMD GPU TARGETS: ${AMDGPU_TARGETS_STRING}")
   foreach(TARGET ${AMDGPU_TARGETS})
@@ -47,24 +42,27 @@ if(UNIX AND NOT APPLE)
     # Vulkan
     -DGGML_VULKAN=ON
     # OpenCL
-    -DGGML_OPENCL=OFF
-    # -DGGML_OPENCL=ON
-    # -DGGML_OPENCL_EMBED_KERNELS=ON
-    # -DGGML_OPENCL_USE_ADRENO_KERNELS=OFF
+    -DGGML_OPENCL=ON
+    -DGGML_OPENCL_EMBED_KERNELS=ON
+    -DGGML_OPENCL_USE_ADRENO_KERNELS=OFF
     # SYCL -DGGML_SYCL=ON Dynamic backends
     -DGGML_NATIVE=OFF
     -DGGML_BACKEND_DL=ON
     -DGGML_CPU_ALL_VARIANTS=ON)
-  set(CMAKE_PARALLEL --parallel 3)
 
   if(WHISPERCPP_NVIDIA)
     list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DGGML_CUDA=ON
          -DCMAKE_CUDA_COMPILER=${CMAKE_CUDA_COMPILER})
     # -DGGML_SYCL_TARGET=NVIDIA)
   elseif(WHISPERCPP_AMD)
-    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS -DCMAKE_C_COMPILER=hipcc
-         -DCMAKE_CXX_COMPILER=hipcc -DGGML_HIP=ON)
-    set(WHISPER_EXTRA_CXX_FLAGS "-fPIC -g --no-warnings ${AMDGPU_TARGET_FLAGS_STRING}")
+    list(APPEND WHISPER_ADDITIONAL_CMAKE_ARGS
+         -DCMAKE_C_COMPILER=/opt/rocm/llvm/bin/clang
+         -DCMAKE_CXX_COMPILER=/opt/rocm/llvm/bin/clang++
+         -DGGML_HIP=ON
+         -DCMAKE_C_COMPILER_LAUNCHER=ccache
+         -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
+         -DHIP_CLANG_LAUNCHER=ccache)
+    set(WHISPER_EXTRA_CXX_FLAGS "-fPIC --no-warnings ${AMDGPU_TARGET_FLAGS_STRING}")
     # -DGGML_SYCL_TARGET=AMD)
   endif()
 endif()
@@ -262,6 +260,12 @@ else()
     DOWNLOAD_EXTRACT_TIMESTAMP true
     GIT_REPOSITORY https://github.com/ggerganov/whisper.cpp.git
     GIT_TAG ${Whispercpp_Build_GIT_TAG}
+    GIT_PROGRESS true
+    USES_TERMINAL_DOWNLOAD true
+    USES_TERMINAL_UPDATE true
+    USES_TERMINAL_BUILD true
+    USES_TERMINAL_INSTALL true
+    USES_TERMINAL_TEST true
     PATCH_COMMAND
       git apply
       ${CMAKE_SOURCE_DIR}/patches/whispercpp-patches.patch
@@ -358,9 +362,9 @@ if(WIN32)
   if(WHISPERCPP_AMD)
     message(STATUS "Setup HIP DLLs installation")
     set(HIPBLAS_DLLS
-        "${HIP_PATH_STR}/bin/hipblas.dll" "${HIP_PATH_STR}/bin/rocblas.dll"
-        "${HIP_PATH_STR}/bin/amdhip64_6.dll"
-        "${HIP_PATH_STR}/bin/amd_comgr_2.dll")
+        "${HIP_PATH_STR}/bin/libhipblas.dll" "${HIP_PATH_STR}/bin/rocblas.dll"
+        "${HIP_PATH_STR}/bin/amdhip64_7.dll"
+        "${HIP_PATH_STR}/bin/amd_comgr_3.dll")
     install(FILES ${HIPBLAS_DLLS} DESTINATION ${CMAKE_SOURCE_DIR}/release/bin)
   elseif(WHISPERCPP_NVIDIA)
     # Check that CUDA_TOOLKIT_ROOT_DIR is set
@@ -471,7 +475,8 @@ else()
     file(GLOB LIBOMP_HEADERS "$ENV{OPENMP_PREFIX}/include/*.h")
     install(FILES ${LIBOMP_HEADERS}
             DESTINATION ${CMAKE_SOURCE_DIR}/release/include)
-    install(FILES /usr/local/lib/libvulkan.1.4.328.dylib
+    set(VULKAN_DYLIB_PATH "/usr/local/lib/libvulkan.$ENV{VULKAN_SDK_VERSION}.dylib")
+    install(FILES ${VULKAN_DYLIB_PATH}
             DESTINATION ${CMAKE_SOURCE_DIR}/release/lib
             RENAME libvulkan.1.dylib)
 
